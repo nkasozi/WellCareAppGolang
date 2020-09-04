@@ -5,6 +5,7 @@ import (
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared/Constants"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func ToJsonString(resp interface{}) (string, error) {
@@ -41,6 +42,18 @@ func GenerateBadRequestResponse(w http.ResponseWriter, err error) {
 	w.Write([]byte(err.Error()))
 	log.Println(err.Error())
 	return
+}
+
+func GetHttpScheme(request *http.Request) string {
+	if strings.Contains(request.Host,"localhost") {
+		return "http://"
+	}
+
+	return "https://"
+}
+
+func GenerateRedirectResponse(w http.ResponseWriter, request *http.Request, newUrl string) {
+	http.Redirect(w, request, newUrl, http.StatusSeeOther)
 }
 
 func GenerateOkRequestResponse(w http.ResponseWriter, json string) {

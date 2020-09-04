@@ -1,9 +1,10 @@
 package webapi
 
 import (
-	httpSwagger "github.com/swaggo/http-swagger"
 	_ "gitlab.com/capslock-ltd/reconciler/backend-golang/docs"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared"
+	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared/Constants"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -26,8 +27,24 @@ import (
 // @BasePath /api/v1
 
 func Swagger(response http.ResponseWriter, request *http.Request) {
-	swaggerDocUrl := "http://" + request.Host + "/Swagger/swagger.json"
-	httpSwagger.Handler(httpSwagger.URL(swaggerDocUrl))
+
+
+	switch request.Method {
+
+	case http.MethodOptions:
+		shared.GenerateCORsResponse(response, http.MethodGet)
+		return
+
+	case http.MethodGet:
+		swaggerDocUrl := shared.GetHttpScheme(request) + request.Host + "/Swagger/swagger.json"
+		finalRedirectUrl:= Constants.SWAGGER_EDITOR_URL + "?url=" + swaggerDocUrl
+		shared.GenerateRedirectResponse(response, request,finalRedirectUrl)
+		return
+
+	default:
+		shared.GenerateMethodNotAllowedResponse(response, request.Method)
+		return
+	}
 }
 
 func SwaggerDoc(response http.ResponseWriter, request *http.Request) {
@@ -42,33 +59,24 @@ func SwaggerDoc(response http.ResponseWriter, request *http.Request) {
 	case http.MethodGet:
 
 		//read file with json
-		//filePathWithCorrectSlashes := filepath.FromSlash("./docs/swagger.json")
-		//dataBytes, err := ioutil.ReadFile(filePathWithCorrectSlashes)
-
-		files:=""
-		serr := filepath.Walk(".",
-			func(path string, info os.FileInfo, err error) error {
-				if err != nil {
-					return err
-				}
-				files+=path+","
-				return nil
-			})
-		if serr != nil {
-			log.Println(serr)
+		executablesPath, execErr := os.Executable()
+		if execErr != nil {
+			log.Println(execErr)
 		}
-		shared.GenerateOkRequestResponse(response, files)
-		return
+
+		filePathWithCorrectSlashes := filepath.Dir(executablesPath) + filepath.FromSlash("/docs/swagger.json")
+		dataBytes, err := ioutil.ReadFile(filePathWithCorrectSlashes)
+
 		//error reading file
-		//if err != nil {
-		//	shared.GenerateInternalServerResponse(response, err)
-		//	return
-		//}
-		//
-		////echo out the json
-		//dataString := string(dataBytes)
-		//shared.GenerateOkRequestResponse(response, dataString)
-		//return
+		if err != nil {
+			shared.GenerateInternalServerResponse(response, err)
+			return
+		}
+
+		//echo out the json
+		dataString := string(dataBytes)
+		shared.GenerateOkRequestResponse(response, dataString)
+		return
 
 	default:
 		//oops unhandled method invoked
