@@ -1,88 +1,43 @@
-package backend_core
+package main
 
 import (
-	"encoding/json"
-	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared"
-	"gitlab.com/capslock-ltd/reconciler/backend-golang/viewmodels/recon-requests"
-	"gitlab.com/capslock-ltd/reconciler/backend-golang/viewmodels/recon_responses"
+	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared/Constants"
+	"gitlab.com/capslock-ltd/reconciler/backend-golang/webapi"
 	"log"
 	"net/http"
+	"os"
 )
 
-func processGetUploadParametersRequest(req recon_requests.GetFileUploadParametersRequest) (recon_responses.GetFileUploadParametersResponse, error) {
+// @version 1.0
+// @description This is a sample server Petstore server.
+// @termsOfService http://swagger.io/terms/
 
-	response := recon_responses.GetFileUploadParametersResponse{}
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
 
-	//validate the view model
-	if err := req.IsValid(); err != nil {
-		return response, err
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host petstore.swagger.io
+// @BasePath /v2
+func main() {
+	//handle routes
+	http.HandleFunc("/GetFileUploadParameters", webapi.GetFileUploadParametersNew)
+	http.HandleFunc("/Swagger", webapi.Swagger)
+	http.HandleFunc("/Swagger/swagger.json", webapi.SwaggerDoc)
+
+	// Determine port for HTTP service.
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = Constants.DEFAULT_SERVER_PORT
+		log.Printf("defaulting to port %s", port)
 	}
 
-	//process the request
-	//TODO
-
-	//build up response
-	response.SourceFileExpectedBatchSize = 200
-	response.SourceFileHash = req.SourceFileHash
-	response.SourceFileName = req.SourceFileName
-	response.ComparisonFileHash = req.ComparisonFileHash
-	response.ComparisonFileName = req.ComparisionFileName
-	response.ComparisonFileExpectedBatchSize = 200
-
-	return response, nil
-}
-
-func GetFileUploadParameters(response http.ResponseWriter, request *http.Request) {
-
-	//decode request to view model
-	var decodedRequest = recon_requests.GetFileUploadParametersRequest{}
-	err := json.NewDecoder(request.Body).Decode(&decodedRequest)
-
-	//failed to decode request
-	if err != nil {
-		generateBadRequestResponse(response, err)
-		return
+	// Start HTTP server.
+	log.Printf("listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
 	}
-
-	//process the request
-	processingResult, processingErr := processGetUploadParametersRequest(decodedRequest)
-
-	if processingErr != nil {
-		generateInternalServerResponse(response, processingErr)
-		return
-	}
-
-	//get the json version of the struct
-	jsonString, encodingErr := shared.ToJsonString(processingResult)
-
-	//failed to encode it as json
-	if encodingErr != nil {
-		generateInternalServerResponse(response, encodingErr)
-		return
-	}
-
-	//return result of processing
-	generateOkRequestResponse(response, jsonString)
 }
 
-func generateBadRequestResponse(w http.ResponseWriter, err error) {
-	w.WriteHeader(http.StatusBadRequest)
-	w.Header().Set("Content-Type","text/plain")
-	w.Write([]byte(err.Error()))
-	log.Println(err.Error())
-	return
-}
-
-func generateOkRequestResponse(w http.ResponseWriter, json string) {
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type","application/json")
-	w.Write([]byte(json))
-}
-
-func generateInternalServerResponse(w http.ResponseWriter, err error) {
-	w.WriteHeader(http.StatusInternalServerError)
-	w.Header().Set("Content-Type","text/plain")
-	w.Write([]byte(err.Error()))
-	log.Println(err.Error())
-	return
-}

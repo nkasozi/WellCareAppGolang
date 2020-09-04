@@ -1,6 +1,7 @@
-package backend_core
+package integrationtests
 
 import (
+	main2 "gitlab.com/capslock-ltd/reconciler/backend-golang/main"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/viewmodels/recon-requests"
 	"io/ioutil"
@@ -10,6 +11,7 @@ import (
 	"testing"
 )
 
+//swaggo
 func TestGetFileUploadParmatersGivenValidRequestExpectSuccess(t *testing.T) {
 
 	bodyStruct := recon_requests.GetFileUploadParametersRequest{
@@ -37,7 +39,7 @@ func TestGetFileUploadParmatersGivenValidRequestExpectSuccess(t *testing.T) {
 
 	recorder := httptest.NewRecorder()
 
-	handler := http.HandlerFunc(GetFileUploadParameters)
+	handler := http.HandlerFunc(main2.GetFileUploadParameters)
 
 	handler.ServeHTTP(recorder, request)
 
