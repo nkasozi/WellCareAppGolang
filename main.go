@@ -23,7 +23,7 @@ import (
 // @BasePath /v2
 func main() {
 	//handle routes
-	http.HandleFunc("/GetFileUploadParameters", webapi.GetFileUploadParametersNew)
+	http.HandleFunc("/GetFileUploadParameters", webapi.GetFileUploadParameters)
 	http.HandleFunc("/Swagger", webapi.Swagger)
 	http.HandleFunc("/Swagger/swagger.json", webapi.SwaggerDoc)
 

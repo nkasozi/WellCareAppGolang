@@ -78,7 +78,7 @@ func processHttpPostRequest(response http.ResponseWriter, request *http.Request)
 // @Failure 404 {string} string "ok"
 // @Failure 500 {string} string "ok"
 // @Router /examples/ping [get]
-func GetFileUploadParametersNew(response http.ResponseWriter, request *http.Request) {
+func GetFileUploadParameters(response http.ResponseWriter, request *http.Request) {
 
 	switch request.Method {
 
@@ -89,7 +89,7 @@ func GetFileUploadParametersNew(response http.ResponseWriter, request *http.Requ
 		return
 
 	case http.MethodPost:
-		//handle POST /GetFileUploadParametersNew
+		//handle POST /GetFileUploadParameters
 		processHttpPostRequest(response, request)
 		return
 

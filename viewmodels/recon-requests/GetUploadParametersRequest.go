@@ -11,6 +11,14 @@ type GetFileUploadParametersRequest struct {
 	ComparisonFileHash string
 	ComparisonFileColumnCount string
 	ComparisonFileRowCount int
+
+	ComparisonPairs []ComparisonPair
+
+}
+
+type ComparisonPair struct {
+	SourceColumnIndex int
+	ComparisonColumnIndex int
 }
 
 func (GetFileUploadParametersRequest) IsValid() error{

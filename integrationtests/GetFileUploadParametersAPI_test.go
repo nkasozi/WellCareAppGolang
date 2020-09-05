@@ -1,9 +1,9 @@
 package integrationtests
 
 import (
-	main2 "gitlab.com/capslock-ltd/reconciler/backend-golang/main"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/viewmodels/recon-requests"
+	"gitlab.com/capslock-ltd/reconciler/backend-golang/webapi"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -39,7 +39,7 @@ func TestGetFileUploadParmatersGivenValidRequestExpectSuccess(t *testing.T) {
 
 	recorder := httptest.NewRecorder()
 
-	handler := http.HandlerFunc(main2.GetFileUploadParameters)
+	handler := http.HandlerFunc(webapi.GetFileUploadParameters)
 
 	handler.ServeHTTP(recorder, request)
 
