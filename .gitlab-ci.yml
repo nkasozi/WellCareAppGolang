@@ -1,9 +1,11 @@
 # This file is a template, and might need editing before it works on your project.
 image: golang:latest
 
+
 variables:
   # Please edit to your GitLab project
   REPO_NAME: gitlab.com/capslock-ltd/reconciler/backend-golang
+  TARGET_BRANCH: master,merge_requests
 
 # The problem is that to be able to use go get, one needs to put
 # the repository in the $GOPATH. So for example if your gitlab domain
@@ -24,12 +26,18 @@ stages:
 
 tests:
   stage: integrationtests
+  only:
+    refs:
+      - [master,merge_requests]
   script:
     - go mod download
     - go test -v ./integrationtests/...
 
 compile:
   stage: build
+  only:
+    refs:
+      - [master,merge_requests]
   script:
     - go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/mybinary
   artifacts:
@@ -38,6 +46,9 @@ compile:
 
 deploy:
   stage: deploy
+  only:
+    refs:
+      - [master,merge_requests]
   image: google/cloud-sdk
   script:
     - echo $GCP_SERVICE_KEY > gcloud-service-key.json # Google Cloud service accounts
