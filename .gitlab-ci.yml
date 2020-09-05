@@ -33,3 +33,15 @@ compile:
   artifacts:
     paths:
       - mybinary
+
+deploy:
+  stage: deploy
+  image: google/cloud-sdk
+  services:
+    - docker:dind
+  script:
+    - echo $GCP_SERVICE_KEY > gcloud-service-key.json # Google Cloud service accounts
+    - gcloud auth activate-service-account --key-file gcloud-service-key.json
+    - gcloud config set project $GCP_PROJECT_ID 
+    - gcloud builds submit --tag gcr.io/reconcilercore/go-reconciler
+    - gcloud run deploy go-reconciler --image gcr.io/reconcilercore/go-reconciler:latest --platform managed --allow-unauthenticated --region us-central1
