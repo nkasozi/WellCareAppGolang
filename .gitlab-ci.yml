@@ -28,7 +28,7 @@ tests:
   stage: integrationtests
   only:
     refs:
-      - [master,merge_requests]
+      - ["master","merge_requests"]
   script:
     - go mod download
     - go test -v ./integrationtests/...
@@ -37,7 +37,7 @@ compile:
   stage: build
   only:
     refs:
-      - [master,merge_requests]
+      - ["master","merge_requests"]
   script:
     - go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/mybinary
   artifacts:
@@ -48,7 +48,7 @@ deploy:
   stage: deploy
   only:
     refs:
-      - [master,merge_requests]
+      - ["master","merge_requests"]
   image: google/cloud-sdk
   script:
     - echo $GCP_SERVICE_KEY > gcloud-service-key.json # Google Cloud service accounts
