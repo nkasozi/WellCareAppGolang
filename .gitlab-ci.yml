@@ -15,16 +15,17 @@ before_script:
   - mkdir -p /app/src/$(dirname $REPO_NAME)
   - ln -svf $CI_PROJECT_DIR /app/src/$REPO_NAME
   - cd /app/src/$REPO_NAME
-  - go mod download
+  
 
 stages:
   - test
   - build
   - deploy
 
-format:
-  stage: test
+tests:
+  stage: integrationtests
   script:
+    - go mod download
     - go test -v ./integrationtests/...
 
 compile:
