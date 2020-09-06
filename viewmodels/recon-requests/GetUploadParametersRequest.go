@@ -1,24 +1,26 @@
 package recon_requests
 
+
+
 type GetFileUploadParametersRequest struct {
-	SourceFileName string
-	SourceFileHash string
-	SourceFileColumnCount int
-	SourceFileRowCount int
+	SourceFileName string `validate:"required"`
+	SourceFileHash string `validate:"required"`
+	SourceFileColumnCount int `validate:"gte=1"`
+	SourceFileRowCount int `validate:"gte=1"`
 
 	//comparison file meta data
-	ComparisionFileName string
-	ComparisonFileHash string
-	ComparisonFileColumnCount string
-	ComparisonFileRowCount int
+	ComparisionFileName string `validate:"required"`
+	ComparisonFileHash string `validate:"required"`
+	ComparisonFileColumnCount int `validate:"gte=1"`
+	ComparisonFileRowCount int `validate:"gte=1"`
 
-	ComparisonPairs []ComparisonPair
+	ComparisonPairs []ComparisonPair `validate:"required,dive,required"`
 
 }
 
 type ComparisonPair struct {
-	SourceColumnIndex int
-	ComparisonColumnIndex int
+	SourceColumnIndex int `validate:"gte=0"`
+	ComparisonColumnIndex int `validate:"gte=0"`
 }
 
 func (GetFileUploadParametersRequest) IsValid() error{

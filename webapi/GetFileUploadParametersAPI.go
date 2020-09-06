@@ -2,10 +2,10 @@ package webapi
 
 import (
 	"encoding/json"
-
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/viewmodels/recon-requests"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/viewmodels/recon_responses"
+	"gitlab.com/capslock-ltd/reconciler/backend-golang/viewmodels/validators"
 	"net/http"
 )
 
@@ -14,11 +14,6 @@ import (
 func processGetUploadParametersRequest(req recon_requests.GetFileUploadParametersRequest) (recon_responses.GetFileUploadParametersResponse, error) {
 
 	response := recon_responses.GetFileUploadParametersResponse{}
-
-	//validate the view model
-	if err := req.IsValid(); err != nil {
-		return response, err
-	}
 
 	//process the request
 	//TODO
@@ -46,9 +41,16 @@ func processHttpPostRequest(response http.ResponseWriter, request *http.Request)
 		return
 	}
 
+	//validate the view model
+	if err := validators.ValidateStruct(decodedRequest); err != nil {
+		shared.GenerateBadRequestResponse(response,err)
+		return
+	}
+
 	//process the request
 	processingResult, processingErr := processGetUploadParametersRequest(decodedRequest)
 
+	//something serious happened when processing the request
 	if processingErr != nil {
 		shared.GenerateInternalServerResponse(response, processingErr)
 		return

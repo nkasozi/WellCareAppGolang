@@ -1,6 +1,7 @@
 package integrationtests
 
 import (
+	. "github.com/smartystreets/goconvey/convey"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/viewmodels/recon-requests"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/webapi"
@@ -14,51 +15,69 @@ import (
 //swaggo
 func TestGetFileUploadParmatersGivenValidRequestExpectSuccess(t *testing.T) {
 
-	bodyStruct := recon_requests.GetFileUploadParametersRequest{
-		SourceFileName:            "MyTestSourceFile.csv",
-		SourceFileHash:            "616161761",
-		SourceFileColumnCount:     3,
-		SourceFileRowCount:        100000,
-		ComparisionFileName:       "MyTestComparisonFile.csv",
-		ComparisonFileHash:        "7277818818",
-		ComparisonFileColumnCount: "3",
-		ComparisonFileRowCount:    2000000,
-	}
+	Convey("Check that when given a Valid GetFileUploadRequest, API Returns Success Response", t, func() {
 
-	jsonRequest, jsonErr := shared.ToJsonString(bodyStruct)
+		Convey("Given that we have setup the request", func() {
 
-	if jsonErr != nil {
-		t.Fatal(jsonErr)
-	}
+			//build the request
+			bodyStruct := recon_requests.GetFileUploadParametersRequest{
+				SourceFileName:            "MyTestSourceFile.csv",
+				SourceFileHash:            "616161761",
+				SourceFileColumnCount:     3,
+				SourceFileRowCount:        100000,
+				ComparisionFileName:       "MyTestComparisonFile.csv",
+				ComparisonFileHash:        "7277818818",
+				ComparisonFileColumnCount: 3,
+				ComparisonFileRowCount:    2000000,
+				ComparisonPairs: []recon_requests.ComparisonPair{{
+					ComparisonColumnIndex: 0,
+					SourceColumnIndex:     1,
+				}},
+			}
 
-	request, requestErr := http.NewRequest("POST", "/GetFileUploadParameters", strings.NewReader(jsonRequest))
+			//turn the reuqets into json
+			jsonRequest, jsonErr := shared.ToJsonString(bodyStruct)
 
-	if requestErr != nil {
-		t.Fatal(requestErr)
-	}
+			//oops something went wrong on turning
+			So(jsonErr, ShouldEqual, nil)
 
-	recorder := httptest.NewRecorder()
+			Convey("And we send the request", func() {
 
-	handler := http.HandlerFunc(webapi.GetFileUploadParameters)
+				//send the request across
+				request, requestErr := http.NewRequest("POST", "/GetFileUploadParameters", strings.NewReader(jsonRequest))
 
-	handler.ServeHTTP(recorder, request)
+				//sending didnt finish well
+				So(requestErr,ShouldEqual,nil)
 
-	resp := recorder.Result()
+				//record the result
+				recorder := httptest.NewRecorder()
 
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf("Http Status Code returned is %v yet we Expected %v", resp.StatusCode, http.StatusOK)
-	}
+				//set up the server
+				handler := http.HandlerFunc(webapi.GetFileUploadParameters)
 
-	body, readBodyErr := ioutil.ReadAll(resp.Body)
+				//boot up the server
+				handler.ServeHTTP(recorder, request)
 
-	if readBodyErr != nil {
-		t.Fatal(readBodyErr)
-	}
+				//recieve resp
+				resp := recorder.Result()
 
-	jsonResponse := string(body)
+				Convey("Then the response should be success", func() {
+					//status code should be success
+					So(resp.StatusCode,ShouldEqual,http.StatusOK)
 
-	if len(jsonResponse) <= 0 {
-		t.Errorf("Empty Response returned by Server")
-	}
+					//read the  body
+					body, readBodyErr := ioutil.ReadAll(resp.Body)
 
+					//oops reading body returned an error stop
+					So(readBodyErr,ShouldEqual,nil)
+
+					//decode the json response
+					jsonResponse := string(body)
+
+					//decoding failed
+					So(len(jsonResponse), ShouldBeGreaterThan, 0 )
+				})
+			})
+		})
+	})
 }
