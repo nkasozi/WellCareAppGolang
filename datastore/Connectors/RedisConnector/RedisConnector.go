@@ -8,11 +8,13 @@ import (
 
 var ctx = context.Background()
 
-var rdb = redis.NewClient(&redis.Options{
+var redisOptions = redis.Options{
 	Addr:     Constants.REDIS_CONNECTION_STRING,
 	Password: Constants.REDIS_PASSWORD,
 	DB:       0, // use default DB
-})
+}
+
+var rdb = redis.NewClient(&redisOptions)
 
 //SaveItemInRedis saves an Item in the redis DataStore
 func SaveItemInRedis(key string, jsonValue string) error {

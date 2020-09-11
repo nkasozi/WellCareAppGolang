@@ -26,11 +26,16 @@ import (
 // @BasePath /
 func main() {
 
+	//setup a new router
 	router := httprouter.New()
+
+	//setup CORs globally
 	router.GlobalOPTIONS = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		shared.GenerateCORsResponse(w, "POST,GET,PUT,DELETE,OPTIONS")
 		return
 	})
+
+	//handle routes
 	router.POST("/GetFileUploadParameters", GetFileUploadParameters)
 	router.GET("/Swagger/index.html", Swagger)
 	router.GET("/Swagger/swagger.json", SwaggerDoc)
@@ -47,6 +52,8 @@ func main() {
 	if err := http.ListenAndServe(":" + port, router); err != nil {
 		log.Fatal(err)
 	}
+
+
 }
 
 // GetFileUploadParameters godoc
