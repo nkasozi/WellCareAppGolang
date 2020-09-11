@@ -12,10 +12,9 @@ Functionality includes [working offline](https://www.simicart.com/blog/pwa-offli
 
 ## Usecase Diagram
 
-The solution consists of the following main functionalities: a web portal, web API, desktop data scraper software, and reporting tools. The image below highlights the main users, their interactions, and use cases with the solution.
-
-![image](assets/usecase-recon.png)
+The solution consists of the following main functionalities: a web portal, web API, desktop data scraper software, and reporting tools. 
+MNore Coming Soon
 
 ## Proposed Architecture
 
-![image](assets/arch-recon.png)
+Coming Soon
