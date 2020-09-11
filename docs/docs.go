@@ -175,7 +175,7 @@ var SwaggerInfo = swaggerInfo{
 	Host:        "us-central1-reconcilercore.cloudfunctions.net",
 	BasePath:    "/",
 	Schemes:     []string{},
-	Title:       "",
+	Title:       "Reconciler Backend Core API",
 	Description: "This is the core backend Reconciler API.",
 }
 

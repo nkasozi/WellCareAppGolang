@@ -2,6 +2,7 @@
     "swagger": "2.0",
     "info": {
         "description": "This is the core backend Reconciler API.",
+        "title": "Reconciler Backend Core API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
             "name": "API Support",

@@ -10,6 +10,7 @@ import (
 	"os"
 )
 
+// @title Reconciler Backend Core API
 // @version 1.0
 // @description This is the core backend Reconciler API.
 // @termsOfService http://swagger.io/terms/
@@ -31,6 +32,7 @@ func main() {
 		return
 	})
 	router.POST("/GetFileUploadParameters", GetFileUploadParameters)
+	router.GET("/Swagger/index.html", Swagger)
 	router.GET("/Swagger/swagger.json", SwaggerDoc)
 
 	// Determine port for HTTP service.
@@ -75,5 +77,11 @@ func GetFileUploadParameters(w http.ResponseWriter, r *http.Request, _ httproute
 // @Router /SwaggerDoc [get]
 func SwaggerDoc(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	webapi.SwaggerDoc(w, r)
+	return
+}
+
+
+func Swagger(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	webapi.Swagger(w, r)
 	return
 }
