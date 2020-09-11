@@ -55,6 +55,7 @@ func main() {
 // @Tags example
 // @Accept json
 // @Produce json
+// @Param request body recon_requests.GetFileUploadParametersRequest true "GetFileUploadParametersRequest"
 // @Success 200 {object} recon_responses.GetFileUploadParametersResponse
 // @Failure 400 {string} string "Bad Request"
 // @Failure 404 {string} string "Not Found"

@@ -46,6 +46,17 @@ var doc = `{
                     "example"
                 ],
                 "summary": "GetFileUploadParameters",
+                "parameters": [
+                    {
+                        "description": "GetFileUploadParametersRequest",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/recon_requests.GetFileUploadParametersRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -152,6 +163,58 @@ var doc = `{
         }
     },
     "definitions": {
+        "Entities.ComparisonPair": {
+            "type": "object",
+            "properties": {
+                "comparisonColumnIndex": {
+                    "type": "integer"
+                },
+                "sourceColumnIndex": {
+                    "type": "integer"
+                }
+            }
+        },
+        "recon_requests.GetFileUploadParametersRequest": {
+            "type": "object",
+            "required": [
+                "comparisionFileName",
+                "comparisonFileHash",
+                "comparisonPairs",
+                "sourceFileHash",
+                "sourceFileName",
+                "userId"
+            ],
+            "properties": {
+                "comparisionFileName": {
+                    "description": "comparison file meta data",
+                    "type": "string"
+                },
+                "comparisonFileHash": {
+                    "type": "string"
+                },
+                "comparisonFileRowCount": {
+                    "type": "integer"
+                },
+                "comparisonPairs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Entities.ComparisonPair"
+                    }
+                },
+                "sourceFileHash": {
+                    "type": "string"
+                },
+                "sourceFileName": {
+                    "type": "string"
+                },
+                "sourceFileRowCount": {
+                    "type": "integer"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
         "recon_responses.GetFileUploadParametersResponse": {
             "type": "object",
             "properties": {

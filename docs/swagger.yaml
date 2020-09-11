@@ -1,5 +1,41 @@
 basePath: /
 definitions:
+  Entities.ComparisonPair:
+    properties:
+      comparisonColumnIndex:
+        type: integer
+      sourceColumnIndex:
+        type: integer
+    type: object
+  recon_requests.GetFileUploadParametersRequest:
+    properties:
+      comparisionFileName:
+        description: comparison file meta data
+        type: string
+      comparisonFileHash:
+        type: string
+      comparisonFileRowCount:
+        type: integer
+      comparisonPairs:
+        items:
+          $ref: '#/definitions/Entities.ComparisonPair'
+        type: array
+      sourceFileHash:
+        type: string
+      sourceFileName:
+        type: string
+      sourceFileRowCount:
+        type: integer
+      userId:
+        type: string
+    required:
+    - comparisionFileName
+    - comparisonFileHash
+    - comparisonPairs
+    - sourceFileHash
+    - sourceFileName
+    - userId
+    type: object
   recon_responses.GetFileUploadParametersResponse:
     properties:
       comparisonFileExpectedBatchSize:
@@ -54,6 +90,13 @@ paths:
       - application/json
       description: given certain details about an incoming upload, it retrieves information
         necessary for successfull upload e.g batch size
+      parameters:
+      - description: GetFileUploadParametersRequest
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/recon_requests.GetFileUploadParametersRequest'
       produces:
       - application/json
       responses:
