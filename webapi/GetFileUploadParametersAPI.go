@@ -2,37 +2,14 @@ package webapi
 
 import (
 	"encoding/json"
-
+	"gitlab.com/capslock-ltd/reconciler/backend-golang/core"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared"
-	"gitlab.com/capslock-ltd/reconciler/backend-golang/viewmodels/recon-requests"
-	"gitlab.com/capslock-ltd/reconciler/backend-golang/viewmodels/recon_responses"
+	"gitlab.com/capslock-ltd/reconciler/backend-golang/viewmodels/recon_requests"
+	"gitlab.com/capslock-ltd/reconciler/backend-golang/viewmodels/validators"
 	"net/http"
 )
 
 
-
-func processGetUploadParametersRequest(req recon_requests.GetFileUploadParametersRequest) (recon_responses.GetFileUploadParametersResponse, error) {
-
-	response := recon_responses.GetFileUploadParametersResponse{}
-
-	//validate the view model
-	if err := req.IsValid(); err != nil {
-		return response, err
-	}
-
-	//process the request
-	//TODO
-
-	//build up response
-	response.SourceFileExpectedBatchSize = 200
-	response.SourceFileHash = req.SourceFileHash
-	response.SourceFileName = req.SourceFileName
-	response.ComparisonFileHash = req.ComparisonFileHash
-	response.ComparisonFileName = req.ComparisionFileName
-	response.ComparisonFileExpectedBatchSize = 200
-
-	return response, nil
-}
 
 func processHttpPostRequest(response http.ResponseWriter, request *http.Request) {
 
@@ -46,9 +23,16 @@ func processHttpPostRequest(response http.ResponseWriter, request *http.Request)
 		return
 	}
 
-	//process the request
-	processingResult, processingErr := processGetUploadParametersRequest(decodedRequest)
+	//validate the view model
+	if err := validators.ValidateStruct(decodedRequest); err != nil {
+		shared.GenerateBadRequestResponse(response, err)
+		return
+	}
 
+	//process the request
+	processingResult, processingErr := core.ProcessGetUploadParametersRequest(decodedRequest)
+
+	//something serious happened when processing the request
 	if processingErr != nil {
 		shared.GenerateInternalServerResponse(response, processingErr)
 		return
@@ -67,21 +51,10 @@ func processHttpPostRequest(response http.ResponseWriter, request *http.Request)
 	shared.GenerateOkRequestResponse(response, jsonString)
 }
 
-// PingExample godoc
-// @Summary ping example
-// @Description do ping
-// @Tags example
-// @Accept json
-// @Produce json
-// @Success 200 {string} string "pong"
-// @Failure 400 {string} string "ok"
-// @Failure 404 {string} string "ok"
-// @Failure 500 {string} string "ok"
-// @Router /examples/ping [get]
+
 func GetFileUploadParameters(response http.ResponseWriter, request *http.Request) {
 
 	switch request.Method {
-
 
 	case http.MethodOptions:
 		//handle CORs preflight request

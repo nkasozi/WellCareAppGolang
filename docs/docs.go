@@ -33,9 +33,9 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/examples/ping": {
-            "get": {
-                "description": "do ping",
+        "/GetFileUploadParameters": {
+            "post": {
+                "description": "given certain details about an incoming upload, it retrieves information necessary for successfull upload e.g batch size",
                 "consumes": [
                     "application/json"
                 ],
@@ -45,32 +45,115 @@ var doc = `{
                 "tags": [
                     "example"
                 ],
-                "summary": "ping example",
+                "summary": "GetFileUploadParameters",
                 "responses": {
                     "200": {
-                        "description": "pong",
+                        "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/recon_responses.GetFileUploadParametersResponse"
                         }
                     },
                     "400": {
-                        "description": "ok",
+                        "description": "Bad Request",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "404": {
-                        "description": "ok",
+                        "description": "Not Found",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "500": {
-                        "description": "ok",
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "string"
                         }
                     }
+                }
+            }
+        },
+        "/SwaggerDoc": {
+            "get": {
+                "description": "returns json needed by Swagger",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "example"
+                ],
+                "summary": "SwaggerDoc",
+                "responses": {
+                    "200": {
+                        "description": "Json data",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "recon_responses.GetFileUploadParametersResponse": {
+            "type": "object",
+            "properties": {
+                "comparisonFileExpectedBatchSize": {
+                    "type": "integer"
+                },
+                "comparisonFileHash": {
+                    "description": "Comparison File meta",
+                    "type": "string"
+                },
+                "comparisonFileIsFirstTimeUpload": {
+                    "description": "flags indicating whether the Comparison file\nis new to us..if not where did we stop",
+                    "type": "boolean"
+                },
+                "comparisonFileLastRowReceived": {
+                    "type": "integer"
+                },
+                "comparisonFileName": {
+                    "type": "string"
+                },
+                "sourceFileExpectedBatchSize": {
+                    "type": "integer"
+                },
+                "sourceFileHash": {
+                    "description": "SRC File meta data",
+                    "type": "string"
+                },
+                "sourceFileIsFirstTimeUpload": {
+                    "description": "flags indicating whether the SRC file\nis new to us..if not where did we stop",
+                    "type": "boolean"
+                },
+                "sourceFileLastRowReceived": {
+                    "type": "integer"
+                },
+                "sourceFileName": {
+                    "type": "string"
+                },
+                "uploadRequestId": {
+                    "description": "unique Id tagged to this whole uplaod",
+                    "type": "string"
                 }
             }
         }
@@ -89,11 +172,11 @@ type swaggerInfo struct {
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
 	Version:     "1.0",
-	Host:        "localhost:8080",
-	BasePath:    "/api/v1",
+	Host:        "us-central1-reconcilercore.cloudfunctions.net",
+	BasePath:    "/",
 	Schemes:     []string{},
-	Title:       "Swagger Example API",
-	Description: "This is a sample server celler server.",
+	Title:       "",
+	Description: "This is the core backend Reconciler API.",
 }
 
 type s struct{}
