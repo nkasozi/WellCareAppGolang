@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/julienschmidt/httprouter"
+	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared/Constants"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/webapi"
 	"log"
@@ -9,7 +11,7 @@ import (
 )
 
 // @version 1.0
-// @description This is a sample server Petstore server.
+// @description This is the core backend Reconciler API.
 // @termsOfService http://swagger.io/terms/
 
 // @contact.name API Support
@@ -19,13 +21,17 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host petstore.swagger.io
-// @BasePath /v2
+// @host us-central1-reconcilercore.cloudfunctions.net
+// @BasePath /
 func main() {
-	//handle routes
-	http.HandleFunc("/GetFileUploadParameters", webapi.GetFileUploadParameters)
-	http.HandleFunc("/Swagger", webapi.Swagger)
-	http.HandleFunc("/Swagger/swagger.json", webapi.SwaggerDoc)
+
+	router := httprouter.New()
+	router.GlobalOPTIONS = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		shared.GenerateCORsResponse(w, "POST,GET,PUT,DELETE,OPTIONS")
+		return
+	})
+	router.POST("/GetFileUploadParameters", GetFileUploadParameters)
+	router.GET("/Swagger/swagger.json", SwaggerDoc)
 
 	// Determine port for HTTP service.
 	port := os.Getenv("PORT")
@@ -36,8 +42,38 @@ func main() {
 
 	// Start HTTP server.
 	log.Printf("listening on port %s", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+	if err := http.ListenAndServe(":" + port, router); err != nil {
 		log.Fatal(err)
 	}
 }
 
+// GetFileUploadParameters godoc
+// @Summary GetFileUploadParameters
+// @Description given certain details about an incoming upload, it retrieves information necessary for successfull upload e.g batch size
+// @Tags example
+// @Accept json
+// @Produce json
+// @Success 200 {object} recon_responses.GetFileUploadParametersResponse
+// @Failure 400 {string} string "Bad Request"
+// @Failure 404 {string} string "Not Found"
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /GetFileUploadParameters [post]
+func GetFileUploadParameters(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	webapi.GetFileUploadParameters(w, r)
+	return
+}
+
+// SwaggerDoc godoc
+// @Summary SwaggerDoc
+// @Description returns json needed by Swagger
+// @Tags example
+// @Produce json
+// @Success 200 {string} string "Json data"
+// @Failure 400 {string} string "Bad Request"
+// @Failure 404 {string} string "Not Found"
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /SwaggerDoc [get]
+func SwaggerDoc(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	webapi.SwaggerDoc(w, r)
+	return
+}

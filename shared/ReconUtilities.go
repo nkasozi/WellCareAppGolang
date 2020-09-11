@@ -5,8 +5,14 @@ import (
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared/Constants"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 )
+
+func GenerateUniqueId(leadString string) string{
+	return leadString + strconv.Itoa(time.Now().Nanosecond())
+}
 
 func ToJsonString(resp interface{}) (string, error) {
 	bytes, err := json.Marshal(resp)
@@ -15,6 +21,8 @@ func ToJsonString(resp interface{}) (string, error) {
 	}
 	return string(bytes), nil
 }
+
+
 
 func GenerateCORsResponse(response http.ResponseWriter, allowedMethods string) {
 	response.Header().Set("Access-Control-Allow-Origin", Constants.CORS_ALLOWED_ORIGINS)

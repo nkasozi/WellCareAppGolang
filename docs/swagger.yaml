@@ -1,43 +1,103 @@
-basePath: /api/v1
-host: localhost:8080
+basePath: /
+definitions:
+  recon_responses.GetFileUploadParametersResponse:
+    properties:
+      comparisonFileExpectedBatchSize:
+        type: integer
+      comparisonFileHash:
+        description: Comparison File meta
+        type: string
+      comparisonFileIsFirstTimeUpload:
+        description: |-
+          flags indicating whether the Comparison file
+          is new to us..if not where did we stop
+        type: boolean
+      comparisonFileLastRowReceived:
+        type: integer
+      comparisonFileName:
+        type: string
+      sourceFileExpectedBatchSize:
+        type: integer
+      sourceFileHash:
+        description: SRC File meta data
+        type: string
+      sourceFileIsFirstTimeUpload:
+        description: |-
+          flags indicating whether the SRC file
+          is new to us..if not where did we stop
+        type: boolean
+      sourceFileLastRowReceived:
+        type: integer
+      sourceFileName:
+        type: string
+      uploadRequestId:
+        description: unique Id tagged to this whole uplaod
+        type: string
+    type: object
+host: us-central1-reconcilercore.cloudfunctions.net
 info:
   contact:
     email: support@swagger.io
     name: API Support
     url: http://www.swagger.io/support
-  description: This is a sample server celler server.
+  description: This is the core backend Reconciler API.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
-  title: Swagger Example API
   version: "1.0"
 paths:
-  /examples/ping:
-    get:
+  /GetFileUploadParameters:
+    post:
       consumes:
       - application/json
-      description: do ping
+      description: given certain details about an incoming upload, it retrieves information
+        necessary for successfull upload e.g batch size
       produces:
       - application/json
       responses:
         "200":
-          description: pong
+          description: OK
           schema:
-            type: string
+            $ref: '#/definitions/recon_responses.GetFileUploadParametersResponse'
         "400":
-          description: ok
+          description: Bad Request
           schema:
             type: string
         "404":
-          description: ok
+          description: Not Found
           schema:
             type: string
         "500":
-          description: ok
+          description: Internal Server Error
           schema:
             type: string
-      summary: ping example
+      summary: GetFileUploadParameters
+      tags:
+      - example
+  /SwaggerDoc:
+    get:
+      description: returns json needed by Swagger
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Json data
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: SwaggerDoc
       tags:
       - example
 swagger: "2.0"
