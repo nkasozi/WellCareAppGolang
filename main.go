@@ -65,8 +65,8 @@ func GetFileUploadParameters(w http.ResponseWriter, r *http.Request, _ httproute
 	return
 }
 
-// SwaggerDoc godoc
-// @Summary SwaggerDoc
+// GetSwaggerJson godoc
+// @Summary GetSwaggerJson
 // @Description returns json needed by Swagger
 // @Tags example
 // @Produce json
@@ -74,13 +74,22 @@ func GetFileUploadParameters(w http.ResponseWriter, r *http.Request, _ httproute
 // @Failure 400 {string} string "Bad Request"
 // @Failure 404 {string} string "Not Found"
 // @Failure 500 {string} string "Internal Server Error"
-// @Router /SwaggerDoc [get]
+// @Router /Swagger/swagger.json [get]
 func SwaggerDoc(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	webapi.SwaggerDoc(w, r)
 	return
 }
 
-
+// Swagger API godoc
+// @Summary Swagger API
+// @Description returns json needed by Swagger
+// @Tags example
+// @Produce json
+// @Success 200 {string} string "Json data"
+// @Failure 400 {string} string "Bad Request"
+// @Failure 404 {string} string "Not Found"
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /Swagger/index.html [get]
 func Swagger(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	webapi.Swagger(w, r)
 	return

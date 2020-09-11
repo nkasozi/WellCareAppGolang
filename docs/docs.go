@@ -74,7 +74,7 @@ var doc = `{
                 }
             }
         },
-        "/SwaggerDoc": {
+        "/Swagger/index.html": {
             "get": {
                 "description": "returns json needed by Swagger",
                 "produces": [
@@ -83,7 +83,45 @@ var doc = `{
                 "tags": [
                     "example"
                 ],
-                "summary": "SwaggerDoc",
+                "summary": "Swagger API",
+                "responses": {
+                    "200": {
+                        "description": "Json data",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/Swagger/swagger.json": {
+            "get": {
+                "description": "returns json needed by Swagger",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "example"
+                ],
+                "summary": "GetSwaggerJson",
                 "responses": {
                     "200": {
                         "description": "Json data",
