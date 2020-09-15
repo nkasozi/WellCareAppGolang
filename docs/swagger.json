@@ -28,7 +28,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "example"
+                    "GetFileUploadParameters API"
                 ],
                 "summary": "GetFileUploadParameters",
                 "parameters": [
@@ -44,7 +44,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "GetFileUploadParametersResponse",
                         "schema": {
                             "$ref": "#/definitions/recon_responses.GetFileUploadParametersResponse"
                         }
@@ -77,7 +77,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "example"
+                    "Swagger APIs"
                 ],
                 "summary": "Swagger API",
                 "responses": {
@@ -115,7 +115,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "example"
+                    "Swagger APIs"
                 ],
                 "summary": "GetSwaggerJson",
                 "responses": {

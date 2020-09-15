@@ -1,6 +1,8 @@
 package Entities
 
-import "time"
+import (
+	"time"
+)
 
 type FilesUploadedParameters struct{
 
@@ -23,6 +25,10 @@ type FilesUploadedParameters struct{
 
 	//comparison data
 	ComparisonPairs []ComparisonPair
+
+	//pubsub fields
+	SourceFileTopics []string
+	ComparisonFileTopic string
 
 	//db model fields
 	Id string

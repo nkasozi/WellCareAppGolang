@@ -101,7 +101,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: GetFileUploadParametersResponse
           schema:
             $ref: '#/definitions/recon_responses.GetFileUploadParametersResponse'
         "400":
@@ -118,7 +118,7 @@ paths:
             type: string
       summary: GetFileUploadParameters
       tags:
-      - example
+      - GetFileUploadParameters API
   /Swagger/index.html:
     get:
       description: returns json needed by Swagger
@@ -143,7 +143,7 @@ paths:
             type: string
       summary: Swagger API
       tags:
-      - example
+      - Swagger APIs
   /Swagger/swagger.json:
     get:
       description: returns json needed by Swagger
@@ -168,5 +168,5 @@ paths:
             type: string
       summary: GetSwaggerJson
       tags:
-      - example
+      - Swagger APIs
 swagger: "2.0"

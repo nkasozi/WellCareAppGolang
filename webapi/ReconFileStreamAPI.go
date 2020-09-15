@@ -9,12 +9,30 @@ import (
 	"net/http"
 )
 
+func StreamReconFile(response http.ResponseWriter, request *http.Request) {
+	switch request.Method {
 
+	case http.MethodOptions:
+		//handle CORs preflight request
+		shared.GenerateCORsResponse(response, http.MethodPost)
+		return
 
-func processGetFileUploadParamsPostRequest(response http.ResponseWriter, request *http.Request) {
+	case http.MethodPost:
+		//handle POST /StreamReconFile
+		processStreamReconFilePostRequest(response, request)
+		return
+
+	default:
+		//oops unhandled method invoked
+		shared.GenerateMethodNotAllowedResponse(response, request.Method)
+		return
+	}
+}
+
+func processStreamReconFilePostRequest(response http.ResponseWriter, request *http.Request) {
 
 	//decode request to view model
-	var decodedRequest = recon_requests.GetFileUploadParametersRequest{}
+	var decodedRequest = recon_requests.StreamReconRequest{}
 	err := json.NewDecoder(request.Body).Decode(&decodedRequest)
 
 	//failed to decode request
@@ -30,7 +48,7 @@ func processGetFileUploadParamsPostRequest(response http.ResponseWriter, request
 	}
 
 	//process the request
-	processingResult, processingErr := core.ProcessGetUploadParametersRequest(decodedRequest)
+	processingResult, processingErr := core.ProcessStreamReconFileApiRequest(decodedRequest)
 
 	//something serious happened when processing the request
 	if processingErr != nil {
@@ -49,27 +67,4 @@ func processGetFileUploadParamsPostRequest(response http.ResponseWriter, request
 
 	//return result of processing
 	shared.GenerateOkRequestResponse(response, jsonString)
-}
-
-
-func GetFileUploadParameters(response http.ResponseWriter, request *http.Request) {
-
-	switch request.Method {
-
-	case http.MethodOptions:
-		//handle CORs preflight request
-		shared.GenerateCORsResponse(response, http.MethodPost)
-		return
-
-	case http.MethodPost:
-		//handle POST /GetFileUploadParameters
-		processGetFileUploadParamsPostRequest(response, request)
-		return
-
-	default:
-		//oops unhandled method invoked
-		shared.GenerateMethodNotAllowedResponse(response, request.Method)
-		return
-	}
-
 }

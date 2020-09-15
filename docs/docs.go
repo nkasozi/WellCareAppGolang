@@ -43,7 +43,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "example"
+                    "GetFileUploadParameters API"
                 ],
                 "summary": "GetFileUploadParameters",
                 "parameters": [
@@ -59,7 +59,7 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "GetFileUploadParametersResponse",
                         "schema": {
                             "$ref": "#/definitions/recon_responses.GetFileUploadParametersResponse"
                         }
@@ -92,7 +92,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "example"
+                    "Swagger APIs"
                 ],
                 "summary": "Swagger API",
                 "responses": {
@@ -130,7 +130,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "example"
+                    "Swagger APIs"
                 ],
                 "summary": "GetSwaggerJson",
                 "responses": {
