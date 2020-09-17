@@ -42,10 +42,13 @@ func (rds RedisDataStoreFilesUplaodedParameters) Add(item Entities.FilesUploaded
 
 	var allItems []Entities.FilesUploadedParameters
 
-	unmarshallErr := json.Unmarshal([]byte(jsonValue), &allItems)
+	if len(jsonValue)>0 {
 
-	if unmarshallErr != nil {
-		return "", unmarshallErr
+		unmarshallErr := json.Unmarshal([]byte(jsonValue), &allItems)
+
+		if unmarshallErr != nil {
+			return "", unmarshallErr
+		}
 	}
 
 	//we append our item to exisiting items
@@ -81,10 +84,13 @@ func (rds RedisDataStoreFilesUplaodedParameters) Update(item Entities.FilesUploa
 
 	var allItems []Entities.FilesUploadedParameters
 
-	unmarshallErr := json.Unmarshal([]byte(jsonValue), &allItems)
+	if len(jsonValue)>0 {
 
-	if unmarshallErr != nil {
-		return "", unmarshallErr
+		unmarshallErr := json.Unmarshal([]byte(jsonValue), &allItems)
+
+		if unmarshallErr != nil {
+			return "", unmarshallErr
+		}
 	}
 
 	//items exist in db

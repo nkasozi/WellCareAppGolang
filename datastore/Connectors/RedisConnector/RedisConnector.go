@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/go-redis/redis/v8"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared/Constants"
+	"time"
 )
 
 var ctx = context.Background()
@@ -11,6 +12,11 @@ var ctx = context.Background()
 var redisOptions = redis.Options{
 	Addr:     Constants.REDIS_CONNECTION_STRING,
 	Password: Constants.REDIS_PASSWORD,
+	DialTimeout:  10 * time.Second,
+	ReadTimeout:  30 * time.Second,
+	WriteTimeout: 30 * time.Second,
+	PoolSize:     10,
+	PoolTimeout:  30 * time.Second,
 	DB:       0, // use default DB
 }
 

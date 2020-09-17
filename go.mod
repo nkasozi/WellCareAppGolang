@@ -3,6 +3,7 @@ module gitlab.com/capslock-ltd/reconciler/backend-golang
 go 1.13
 
 require (
+	cloud.google.com/go/pubsub v1.6.1
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/go-openapi/spec v0.19.9 // indirect
 	github.com/go-openapi/swag v0.19.9 // indirect
