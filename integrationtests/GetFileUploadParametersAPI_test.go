@@ -12,6 +12,8 @@ func TestGetFileUploadParametersGivenValidRequestExpectSuccess(t *testing.T) {
 
 	Convey("Check that when given a Valid GetFileUploadRequest, API Returns Success Response", t, func() {
 
+		Helpers.PointPubSubServiceProviderToAnInMemoryInstance()
+
 		Convey("Given that we have setup a Valid GetFileUploadRequest request", func() {
 
 			//build the request
@@ -38,6 +40,8 @@ func TestGetFileUploadParametersGivenInvalidRequestExpectFailure(t *testing.T) {
 
 	Convey("Check that when given a invalid GetFileUploadRequest, API Returns Failure Response", t, func() {
 
+		Helpers.PointPubSubServiceProviderToAnInMemoryInstance()
+
 		Convey("Given that we have setup the request", func() {
 
 			jsonRequest :=  Helpers.SetUpInvalidGetFileUploadParametersRequest()
@@ -47,7 +51,9 @@ func TestGetFileUploadParametersGivenInvalidRequestExpectFailure(t *testing.T) {
 				resp :=  Helpers.SendTestGetFileUploadParametersRequest(jsonRequest)
 
 				Convey("Then the response should NOT be success", func() {
+
 					Helpers.AssertThatResponseWasNotSuccessful(resp)
+
 				})
 			})
 		})

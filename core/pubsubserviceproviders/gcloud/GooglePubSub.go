@@ -4,11 +4,20 @@ import (
 	"cloud.google.com/go/pubsub"
 	"context"
 	"fmt"
+	"gitlab.com/capslock-ltd/reconciler/backend-golang/datastore/Entities"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared/Constants"
+	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared/Enums/TopicSubscriberTypes"
 	"time"
 )
 
-func CreateTopicOnCloudPubSub(projectID, topicID string) (*pubsub.Topic, error) {
+type googlePubSub struct {
+}
+
+func NewPubSubClient() *googlePubSub {
+	return &googlePubSub{}
+}
+
+func (googlePubSub) CreateTopicOnPubSub(projectID, topicID string) (*Entities.Topic, error) {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 
@@ -22,10 +31,16 @@ func CreateTopicOnCloudPubSub(projectID, topicID string) (*pubsub.Topic, error) 
 		return nil, fmt.Errorf("CreateTopic: %v", err)
 	}
 
-	return topic, nil
+	createdTopic := Entities.Topic{
+		TopicName:           topic.ID(),
+		ChunkSequenceNumber: 0,
+		TopicType:           "",
+	}
+
+	return &createdTopic, nil
 }
 
-func CreatePullSubscriberForTopicOnCloudPubSub(projectID, subID string, topicID string) (*pubsub.Subscription, error) {
+func (googlePubSub) CreatePullSubscriberForTopicOnPubSub(projectID, subID string, topicID string) (*Entities.TopicSubscriber, error) {
 
 	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
 	ctx := context.Background()
@@ -38,8 +53,8 @@ func CreatePullSubscriberForTopicOnCloudPubSub(projectID, subID string, topicID 
 	topic := client.Topic(topicID)
 
 	sub, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
-		Topic:       topic,
-		AckDeadline: Constants.MESSAGE_ACK_DEALINE_IN_SECS * time.Second,
+		Topic:                 topic,
+		AckDeadline:           Constants.MESSAGE_ACK_DEALINE_IN_SECS * time.Second,
 		EnableMessageOrdering: Constants.ENABLE_MESSAGE_ORDERING,
 	})
 
@@ -47,14 +62,18 @@ func CreatePullSubscriberForTopicOnCloudPubSub(projectID, subID string, topicID 
 		return nil, fmt.Errorf("CreateSubscription: %v", err)
 	}
 
-	return sub, nil
+	createdSubscriber := Entities.TopicSubscriber{
+		Name:            sub.ID(),
+		SubscriberType:  TopicSubscriberTypes.PullSubscriber,
+		NotificationUrl: "",
+		TopicName:       topicID,
+	}
+
+	return &createdSubscriber, nil
 }
 
-func CreatePushSubscriberForTopicOnCloudPubSub(projectID, subID string, topicID string, endpoint string) (*pubsub.Subscription, error) {
-	// projectID := "my-project-id"
-	// subID := "my-sub"
-	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
-	// endpoint := "https://my-test-project.appspot.com/push"
+func (googlePubSub) CreatePushSubscriberForTopicOnPubSub(projectID, subID string, topicID string, endpoint string) (*Entities.TopicSubscriber, error) {
+
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -64,9 +83,9 @@ func CreatePushSubscriberForTopicOnCloudPubSub(projectID, subID string, topicID 
 	topic := client.Topic(topicID)
 
 	sub, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
-		Topic:       topic,
-		AckDeadline: Constants.MESSAGE_ACK_DEALINE_IN_SECS * time.Second,
-		PushConfig:  pubsub.PushConfig{Endpoint: endpoint},
+		Topic:                 topic,
+		AckDeadline:           Constants.MESSAGE_ACK_DEALINE_IN_SECS * time.Second,
+		PushConfig:            pubsub.PushConfig{Endpoint: endpoint},
 		EnableMessageOrdering: Constants.ENABLE_MESSAGE_ORDERING,
 	})
 
@@ -74,10 +93,17 @@ func CreatePushSubscriberForTopicOnCloudPubSub(projectID, subID string, topicID 
 		return nil, fmt.Errorf("CreateSubscription: %v", err)
 	}
 
-	return sub, nil
+	createdSubscriber := Entities.TopicSubscriber{
+		Name:            sub.ID(),
+		SubscriberType:  TopicSubscriberTypes.PushSubscriber,
+		NotificationUrl: endpoint,
+		TopicName:       topicID,
+	}
+
+	return &createdSubscriber, nil
 }
 
-func PublishMessageToCloudRunTopic(data []byte, projectID, topicID string) (string, error) {
+func (googlePubSub) PublishMessageToPubSubTopic(data []byte, projectID, topicID string) (string, error) {
 
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
@@ -93,6 +119,7 @@ func PublishMessageToCloudRunTopic(data []byte, projectID, topicID string) (stri
 			"username": "gcp",
 		},
 	})
+
 	// Block until the result is returned and a server-generated
 	// ID is returned for the published message.
 	id, err := result.Get(ctx)

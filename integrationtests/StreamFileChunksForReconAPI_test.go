@@ -9,7 +9,9 @@ import (
 
 func TestThatGivenValidStreamReconComparisonFileRequestExpectSuccess(t *testing.T) {
 
-	Convey("Check that when given a Valid StreamFileChunkForReconRequest for a Source File, API Returns Success Response", t, func() {
+	Convey("Check that when given a Valid StreamFileChunkForReconRequest for a Comparison File, API Returns Success Response", t, func() {
+
+		Helpers.PointPubSubServiceProviderToAnInMemoryInstance()
 
 		Convey("Given that we have setup a Valid GetFileUploadRequest request", func() {
 
@@ -52,7 +54,9 @@ func TestThatGivenValidStreamReconSrcFileRequestExpectSuccess(t *testing.T) {
 
 	Convey("Check that when given a Valid StreamFileChunkForReconRequest for a Source File, API Returns Success Response", t, func() {
 
-		Convey("Given that we have setup a Valid GetFileUploadRequest request", func() {
+		Helpers.PointPubSubServiceProviderToAnInMemoryInstance()
+
+		Convey("Given that we have setup a Valid StreamFileChunkForReconRequest request", func() {
 
 			//build the request
 			jsonRequest := Helpers.SetUpValidGetFileUploadParametersRequest()
@@ -91,9 +95,10 @@ func TestThatGivenValidStreamReconSrcFileRequestExpectSuccess(t *testing.T) {
 
 func TestThatGivenInvalidStreamReconFileRequestExpectSuccess(t *testing.T) {
 
-	Convey("Check that when given a Valid StreamFileChunkForReconRequest for a Source File, API Returns Success Response", t, func() {
+	Convey("Check that when given an Invalid StreamFileChunkForReconRequest for a Source File, API Returns Failure Response", t, func() {
 
-		//We can now proceed and test the recon API
+		Helpers.PointPubSubServiceProviderToAnInMemoryInstance()
+
 		Convey("And Given that we have an Invalid StreamFileChunkForRecon request", func() {
 
 			jsonRequest := Helpers.SetUpInvalidStreamFileChunkForReconRequest()
@@ -102,7 +107,7 @@ func TestThatGivenInvalidStreamReconFileRequestExpectSuccess(t *testing.T) {
 
 				resp := Helpers.SendTestStreamFileChunkForReconRequest(jsonRequest)
 
-				Convey("Then the response should be success", func() {
+				Convey("Then the response should  NOT be success", func() {
 
 					Helpers.AssertThatResponseWasNotSuccessful(resp)
 

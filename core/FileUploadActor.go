@@ -1,10 +1,8 @@
 package core
 
 import (
-	"cloud.google.com/go/pubsub"
 	"errors"
 	"fmt"
-	"gitlab.com/capslock-ltd/reconciler/backend-golang/core/gcloud"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/datastore"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/datastore/Entities"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared"
@@ -96,11 +94,11 @@ func createSubscriber(subscriber Entities.TopicSubscriber) error {
 
 	switch subscriber.SubscriberType {
 	case TopicSubscriberTypes.PullSubscriber:
-		_, err := gcloud.CreatePullSubscriberForTopicOnCloudPubSub(Constants.GOOGLE_CLOUD_PROJECT_ID, subscriber.Name, subscriber.TopicName)
+		_, err := PubSubServiceProvider.CreatePullSubscriberForTopicOnPubSub(Constants.GOOGLE_CLOUD_PROJECT_ID, subscriber.Name, subscriber.TopicName)
 		return err
 
 	case TopicSubscriberTypes.PushSubscriber:
-		_, err := gcloud.CreatePushSubscriberForTopicOnCloudPubSub(Constants.GOOGLE_CLOUD_PROJECT_ID, subscriber.Name, subscriber.TopicName, subscriber.NotificationUrl)
+		_, err := PubSubServiceProvider.CreatePushSubscriberForTopicOnPubSub(Constants.GOOGLE_CLOUD_PROJECT_ID, subscriber.Name, subscriber.TopicName, subscriber.NotificationUrl)
 		return err
 
 	default:
@@ -225,7 +223,7 @@ func processRequestToUploadNewFile(req recon_requests.GetFileUploadParametersReq
 	//create comparison file topics in Queue Service
 	comparisonFileTopicName := GenerateNameForComparisonFileTopic(req.UserId, req.ComparisonFileHash)
 	topicSubscribers = getComparisonFileSubscribers(topicSubscribers, comparisonFileTopicName)
-	_, err = gcloud.CreateTopicOnCloudPubSub(Constants.GOOGLE_CLOUD_PROJECT_ID, comparisonFileTopicName)
+	_, err = PubSubServiceProvider.CreateTopicOnPubSub(Constants.GOOGLE_CLOUD_PROJECT_ID, comparisonFileTopicName)
 
 	if err != nil {
 		return nil, err
@@ -322,13 +320,13 @@ func getSourceFileTopicSubscribers(req recon_requests.GetFileUploadParametersReq
 	return topicSubscribers
 }
 
-func createSourceFileTopicOnCloudPubSub(projectId string, topics []Entities.Topic) ([]pubsub.Topic, error) {
+func createSourceFileTopicOnCloudPubSub(projectId string, topics []Entities.Topic) ([]Entities.Topic, error) {
 
-	var topicPtrs []pubsub.Topic
+	var topicPtrs []Entities.Topic
 
 	for _, topic := range topics {
 
-		topicPtr, err := gcloud.CreateTopicOnCloudPubSub(projectId, topic.TopicName)
+		topicPtr, err := PubSubServiceProvider.CreateTopicOnPubSub(projectId, topic.TopicName)
 
 		if err != nil {
 			return nil, err

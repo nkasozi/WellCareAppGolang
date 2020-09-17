@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"gitlab.com/capslock-ltd/reconciler/backend-golang/core/gcloud"
+	"gitlab.com/capslock-ltd/reconciler/backend-golang/core/pubsubserviceproviders"
+	"gitlab.com/capslock-ltd/reconciler/backend-golang/core/pubsubserviceproviders/gcloud"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/datastore/Entities"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared/Constants"
@@ -15,6 +16,7 @@ import (
 )
 
 var srcFileTopicNotFoundErr = errors.New("Unable to find Src file topic for this chunk sequence Number")
+var PubSubServiceProvider pubsubserviceproviders.PubSubInterface = gcloud.NewPubSubClient()
 
 func ProcessStreamReconFileApiRequest(req recon_requests.StreamFileChunkForReconRequest) (processingResult *recon_responses.StreamFileChunkForReconResponse, err error) {
 
@@ -93,7 +95,7 @@ func processStreamSourceFileReconRequest(req recon_requests.StreamFileChunkForRe
 	}
 
 	//publish the json to the queue servic
-	messageId, err := gcloud.PublishMessageToCloudRunTopic(jsonBytes, Constants.GOOGLE_CLOUD_PROJECT_ID, topicForThisSourceFile.TopicName)
+	messageId, err := PubSubServiceProvider.PublishMessageToPubSubTopic(jsonBytes, Constants.GOOGLE_CLOUD_PROJECT_ID, topicForThisSourceFile.TopicName)
 
 	//oops error
 	//on publish
@@ -153,7 +155,7 @@ func processStreamComparisonFileReconRequest(req recon_requests.StreamFileChunkF
 	topicForThisComparisonFile := originalUploadDetails.ComparisonFileTopic
 
 	//publish the message to the topic
-	messageId, err := gcloud.PublishMessageToCloudRunTopic(jsonBytes, Constants.GOOGLE_CLOUD_PROJECT_ID, topicForThisComparisonFile.TopicName)
+	messageId, err := PubSubServiceProvider.PublishMessageToPubSubTopic(jsonBytes, Constants.GOOGLE_CLOUD_PROJECT_ID, topicForThisComparisonFile.TopicName)
 
 	//err on publish
 	if err != nil {
