@@ -37,6 +37,7 @@ func main() {
 
 	//handle routes
 	router.POST("/GetFileUploadParameters", GetFileUploadParameters)
+	router.POST("/StreamFileChunksForRecon", StreamFileChunksForRecon)
 	router.GET("/Swagger/index.html", Swagger)
 	router.GET("/Swagger/swagger.json", SwaggerDoc)
 
@@ -71,6 +72,24 @@ func main() {
 // @Router /GetFileUploadParameters [post]
 func GetFileUploadParameters(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	webapi.GetFileUploadParameters(w, r)
+	return
+}
+
+// StreamFileChunksForRecon godoc
+// @Summary StreamFileChunksForRecon
+// @Description Receives either Source or Comparison File Chunks and routes them appropriately for Reconciliation
+// @Tags StreamFileChunksForRecon API
+// @Accept json
+// @Produce json
+// @Param request body recon_requests.StreamFileChunkForReconRequest true "StreamFileChunkForReconRequest"
+// @Success 200 {object} recon_responses.StreamFileChunkForReconResponse "StreamFileChunkForReconResponse"
+// @Failure 400 {string} string "Bad Request"
+// @Failure 401 {string} string "Unauthorized"
+// @Failure 404 {string} string "Not Found"
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /GetFileUploadParameters [post]
+func StreamFileChunksForRecon(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	webapi.StreamFileChunksForRecon(w, r)
 	return
 }
 

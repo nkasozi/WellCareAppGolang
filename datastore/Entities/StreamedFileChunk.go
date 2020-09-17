@@ -5,17 +5,16 @@ import (
 	"time"
 )
 
-type StreamedFileChunk struct
-{
-	FileType UploadFileTypes.UploadFileType
-	UploadRequestId string
-	ChunkSequenceNumber int
-	Records []string
-
+type StreamedFileChunk struct {
 	//db model fields
-	Id string
-	DateCreated time.Time
-	DateModified time.Time
+	Id                  string
+	DateCreated         time.Time
+	DateModified        time.Time
+	FileType            UploadFileTypes.UploadFileType
+	UploadRequestId     string
+	ChunkSequenceNumber int
+	Records             []string
+	IsEOF               bool
 }
 
 func (sf StreamedFileChunk) GetEntityId() string {

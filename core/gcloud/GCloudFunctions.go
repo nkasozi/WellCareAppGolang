@@ -4,6 +4,7 @@ import (
 	"cloud.google.com/go/pubsub"
 	"context"
 	"fmt"
+	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared/Constants"
 	"time"
 )
 
@@ -38,7 +39,8 @@ func CreatePullSubscriberForTopicOnCloudPubSub(projectID, subID string, topicID 
 
 	sub, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
 		Topic:       topic,
-		AckDeadline: 20 * time.Second,
+		AckDeadline: Constants.MESSAGE_ACK_DEALINE_IN_SECS * time.Second,
+		EnableMessageOrdering: Constants.ENABLE_MESSAGE_ORDERING,
 	})
 
 	if err != nil {
@@ -63,8 +65,9 @@ func CreatePushSubscriberForTopicOnCloudPubSub(projectID, subID string, topicID 
 
 	sub, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
 		Topic:       topic,
-		AckDeadline: 10 * time.Second,
+		AckDeadline: Constants.MESSAGE_ACK_DEALINE_IN_SECS * time.Second,
 		PushConfig:  pubsub.PushConfig{Endpoint: endpoint},
+		EnableMessageOrdering: Constants.ENABLE_MESSAGE_ORDERING,
 	})
 
 	if err != nil {

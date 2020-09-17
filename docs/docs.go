@@ -35,7 +35,7 @@ var doc = `{
     "paths": {
         "/GetFileUploadParameters": {
             "post": {
-                "description": "given certain details about an incoming upload, it retrieves information necessary for successfull upload e.g batch size",
+                "description": "Receives either Source or Comparison File Chunks and routes them appropriately for Reconciliation",
                 "consumes": [
                     "application/json"
                 ],
@@ -43,29 +43,35 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "GetFileUploadParameters API"
+                    "StreamFileChunksForRecon API"
                 ],
-                "summary": "GetFileUploadParameters",
+                "summary": "StreamFileChunksForRecon",
                 "parameters": [
                     {
-                        "description": "GetFileUploadParametersRequest",
+                        "description": "StreamFileChunkForReconRequest",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/recon_requests.GetFileUploadParametersRequest"
+                            "$ref": "#/definitions/recon_requests.StreamFileChunkForReconRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "GetFileUploadParametersResponse",
+                        "description": "StreamFileChunkForReconResponse",
                         "schema": {
-                            "$ref": "#/definitions/recon_responses.GetFileUploadParametersResponse"
+                            "$ref": "#/definitions/recon_responses.StreamFileChunkForReconResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "string"
                         }
@@ -87,7 +93,7 @@ var doc = `{
         },
         "/Swagger/index.html": {
             "get": {
-                "description": "returns json needed by Swagger",
+                "description": "used to access the swagger GUI",
                 "produces": [
                     "application/json"
                 ],
@@ -182,6 +188,7 @@ var doc = `{
                 "comparisonPairs",
                 "sourceFileHash",
                 "sourceFileName",
+                "sourceFileRowCount",
                 "userId"
             ],
             "properties": {
@@ -215,6 +222,36 @@ var doc = `{
                 }
             }
         },
+        "recon_requests.StreamFileChunkForReconRequest": {
+            "type": "object",
+            "required": [
+                "chunkSequenceNumber",
+                "fileType",
+                "isEOF",
+                "records",
+                "uploadRequestId"
+            ],
+            "properties": {
+                "chunkSequenceNumber": {
+                    "type": "integer"
+                },
+                "fileType": {
+                    "type": "string"
+                },
+                "isEOF": {
+                    "type": "boolean"
+                },
+                "records": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "uploadRequestId": {
+                    "type": "string"
+                }
+            }
+        },
         "recon_responses.GetFileUploadParametersResponse": {
             "type": "object",
             "properties": {
@@ -222,12 +259,7 @@ var doc = `{
                     "type": "integer"
                 },
                 "comparisonFileHash": {
-                    "description": "Comparison File meta",
                     "type": "string"
-                },
-                "comparisonFileIsFirstTimeUpload": {
-                    "description": "flags indicating whether the Comparison file\nis new to us..if not where did we stop",
-                    "type": "boolean"
                 },
                 "comparisonFileLastRowReceived": {
                     "type": "integer"
@@ -235,16 +267,17 @@ var doc = `{
                 "comparisonFileName": {
                     "type": "string"
                 },
+                "isFirstTimeUploadForCmpFile": {
+                    "type": "boolean"
+                },
+                "isFirstTimeUploadForSourceFile": {
+                    "type": "boolean"
+                },
                 "sourceFileExpectedBatchSize": {
                     "type": "integer"
                 },
                 "sourceFileHash": {
-                    "description": "SRC File meta data",
                     "type": "string"
-                },
-                "sourceFileIsFirstTimeUpload": {
-                    "description": "flags indicating whether the SRC file\nis new to us..if not where did we stop",
-                    "type": "boolean"
                 },
                 "sourceFileLastRowReceived": {
                     "type": "integer"
@@ -253,7 +286,23 @@ var doc = `{
                     "type": "string"
                 },
                 "uploadRequestId": {
-                    "description": "unique Id tagged to this whole uplaod",
+                    "type": "string"
+                }
+            }
+        },
+        "recon_responses.StreamFileChunkForReconResponse": {
+            "type": "object",
+            "properties": {
+                "messageId": {
+                    "type": "string"
+                },
+                "originalChunkSequenceNumber": {
+                    "type": "integer"
+                },
+                "originalFileType": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 }
             }

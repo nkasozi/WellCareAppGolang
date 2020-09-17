@@ -4,40 +4,38 @@ import (
 	"time"
 )
 
-type FilesUploadedParameters struct{
+type FilesUploadedParameters struct {
 
-	//id of user uploading file
-	UserId string
+	//db model fields
+	Id           string
+	DateCreated  time.Time
+	DateModified time.Time
+	UserId       string
 
 	//src file meta data
-	SourceFileName string
-	SourceFileHash string
-	SourceFileRowCount int
+	SourceFileName              string
+	SourceFileHash              string
+	SourceFileRowCount          int
 	SourceFileExpectedBatchSize int
-	SourceFileLastRowReceived int
+	SourceFileLastRowReceived   int
 
 	//comparison file meta data
-	ComparisionFileName string
-	ComparisonFileHash string
-	ComparisonFileRowCount int
+	ComparisionFileName             string
+	ComparisonFileHash              string
+	ComparisonFileRowCount          int
 	ComparisonFileExpectedBatchSize int
-	ComparisonFileLastRowReceived int
+	ComparisonFileLastRowReceived   int
 
 	//comparison data
 	ComparisonPairs []ComparisonPair
 
 	//pubsub fields
-	SourceFileTopics []string
-	ComparisonFileTopic string
-
-	//db model fields
-	Id string
-	DateCreated time.Time
-	DateModified time.Time
+	SourceFileTopics    []Topic
+	ComparisonFileTopic Topic
 }
 
 type ComparisonPair struct {
-	SourceColumnIndex int `validate:"gte=0"`
+	SourceColumnIndex     int `validate:"gte=0"`
 	ComparisonColumnIndex int `validate:"gte=0"`
 }
 
@@ -47,7 +45,7 @@ func (fu FilesUploadedParameters) GetEntityId() string {
 
 func (fu FilesUploadedParameters) SetEntityId(Id string) EntityInterface {
 	fu.Id = Id
-	return  fu
+	return fu
 }
 
 func (fu FilesUploadedParameters) GetDateCreated() string {

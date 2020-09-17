@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func StreamReconFile(response http.ResponseWriter, request *http.Request) {
+func StreamFileChunksForRecon(response http.ResponseWriter, request *http.Request) {
 	switch request.Method {
 
 	case http.MethodOptions:
@@ -32,7 +32,7 @@ func StreamReconFile(response http.ResponseWriter, request *http.Request) {
 func processStreamReconFilePostRequest(response http.ResponseWriter, request *http.Request) {
 
 	//decode request to view model
-	var decodedRequest = recon_requests.StreamReconRequest{}
+	var decodedRequest = recon_requests.StreamFileChunkForReconRequest{}
 	err := json.NewDecoder(request.Body).Decode(&decodedRequest)
 
 	//failed to decode request

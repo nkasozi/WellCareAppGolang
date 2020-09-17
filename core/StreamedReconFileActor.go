@@ -14,9 +14,12 @@ import (
 	"time"
 )
 
-func ProcessStreamReconFileApiRequest(req recon_requests.StreamReconRequest) (processingResult *recon_responses.StreamReconFileResponse, err error) {
+var srcFileTopicNotFoundErr = errors.New("Unable to find Src file topic for this chunk sequence Number")
 
-	defer func() (*recon_responses.StreamReconFileResponse, error) {
+func ProcessStreamReconFileApiRequest(req recon_requests.StreamFileChunkForReconRequest) (processingResult *recon_responses.StreamFileChunkForReconResponse, err error) {
+
+	//make sure we catch any panics etc
+	defer func() (*recon_responses.StreamFileChunkForReconResponse, error) {
 
 		//catch any exceptions and return a clean error
 		if r := recover(); r != nil {
@@ -33,10 +36,14 @@ func ProcessStreamReconFileApiRequest(req recon_requests.StreamReconRequest) (pr
 	//those details should have the topics
 	originalUploadRequest, err := redisDataStore.GetById(req.UploadRequestId)
 
+	//cant find original
+	//upload request
 	if err != nil {
 		return nil, err
 	}
 
+	//handle differently depending
+	//on file type
 	switch req.FileType {
 
 	case UploadFileTypes.SrcFile:
@@ -52,77 +59,118 @@ func ProcessStreamReconFileApiRequest(req recon_requests.StreamReconRequest) (pr
 
 //src file topic will be pull based subscription
 //comparison file topic will be push based
-func processStreamSourceFileReconRequest(req recon_requests.StreamReconRequest, originalUploadDetails Entities.FilesUploadedParameters) (*recon_responses.StreamReconFileResponse, error) {
+func processStreamSourceFileReconRequest(req recon_requests.StreamFileChunkForReconRequest, originalUploadDetails Entities.FilesUploadedParameters) (*recon_responses.StreamFileChunkForReconResponse, error) {
 
+	//search for the right topic for this chunk
+	topicForThisSourceFile, err := getTopicForThisSrcFileChunk(originalUploadDetails.SourceFileTopics, req.ChunkSequenceNumber)
+
+	//oops cant find the topic meant
+	//for this chunk
+	if err != nil {
+		return nil, err
+	}
+
+	//we can now build the job THAT will be published
+	//to the QueueService
 	streamedFileChunk := Entities.StreamedFileChunk{
 		UploadRequestId:     req.UploadRequestId,
 		FileType:            req.FileType,
 		ChunkSequenceNumber: req.ChunkSequenceNumber,
 		Records:             req.Records,
+		IsEOF:               req.IsEOF,
 		Id:                  shared.GenerateUniqueId("SRC-FILE-CHUNK-"),
 		DateCreated:         time.Now(),
 		DateModified:        time.Now(),
 	}
 
+	//turn it to json
 	jsonBytes, err := json.Marshal(&streamedFileChunk)
 
+	//oops error on trying to change
+	//it to Json
 	if err != nil {
 		return nil, err
 	}
 
-	topicForThisSourceFile := GenerateNameForSourceFileTopic(originalUploadDetails.UserId, originalUploadDetails.SourceFileHash, req.ChunkSequenceNumber)
+	//publish the json to the queue servic
+	messageId, err := gcloud.PublishMessageToCloudRunTopic(jsonBytes, Constants.GOOGLE_CLOUD_PROJECT_ID, topicForThisSourceFile.TopicName)
 
-	messageId, err := gcloud.PublishMessageToCloudRunTopic(jsonBytes, Constants.GOOGLE_CLOUD_PROJECT_ID, topicForThisSourceFile)
-
+	//oops error
+	//on publish
 	if err != nil {
 		return nil, err
 	}
 
-	processingResult := recon_responses.StreamReconFileResponse{
-		MessageId: messageId,
-		Status:    "OK",
+	//by this time we have sucess
+	processingResult := recon_responses.StreamFileChunkForReconResponse{
+		MessageId:                   messageId,
+		Status:                      "OK",
+		OriginalChunkSequenceNumber: req.ChunkSequenceNumber,
+		OriginalFileType:            req.FileType,
 	}
 
+	//return result
 	return &processingResult, nil
 }
 
+func getTopicForThisSrcFileChunk(topics []Entities.Topic, number int) (*Entities.Topic, error) {
 
+	for _, topic := range topics {
 
-func processStreamComparisonFileReconRequest(req recon_requests.StreamReconRequest, originalUploadDetails Entities.FilesUploadedParameters) (*recon_responses.StreamReconFileResponse, error) {
+		if topic.ChunkSequenceNumber == number {
+			return &topic, nil
+		}
+
+	}
+
+	return nil, srcFileTopicNotFoundErr
+}
+
+func processStreamComparisonFileReconRequest(req recon_requests.StreamFileChunkForReconRequest, originalUploadDetails Entities.FilesUploadedParameters) (*recon_responses.StreamFileChunkForReconResponse, error) {
+
+	//we can now build the message that  will be published
+	//to the QueueService
 	streamedFileChunk := Entities.StreamedFileChunk{
 		UploadRequestId:     req.UploadRequestId,
 		FileType:            req.FileType,
 		ChunkSequenceNumber: req.ChunkSequenceNumber,
 		Records:             req.Records,
+		IsEOF:               req.IsEOF,
 		Id:                  shared.GenerateUniqueId("CMP-FILE-CHUNK-"),
 		DateCreated:         time.Now(),
 		DateModified:        time.Now(),
 	}
 
+	//we turn the request to json
 	jsonBytes, err := json.Marshal(&streamedFileChunk)
 
+	//oops error on jsonifying
 	if err != nil {
 		return nil, err
 	}
 
-	topicForThisComparisonFile := GenerateNameForComparisonFileTopic(originalUploadDetails.UserId, originalUploadDetails.ComparisonFileHash)
+	//get topic for the comparison file
+	topicForThisComparisonFile := originalUploadDetails.ComparisonFileTopic
 
-	messageId, err := gcloud.PublishMessageToCloudRunTopic(jsonBytes, Constants.GOOGLE_CLOUD_PROJECT_ID, topicForThisComparisonFile)
+	//publish the message to the topic
+	messageId, err := gcloud.PublishMessageToCloudRunTopic(jsonBytes, Constants.GOOGLE_CLOUD_PROJECT_ID, topicForThisComparisonFile.TopicName)
 
+	//err on publish
 	if err != nil {
 		return nil, err
 	}
 
-	processingResult := recon_responses.StreamReconFileResponse{
-		MessageId: messageId,
-		Status:    "OK",
+	//uild success response
+	processingResult := recon_responses.StreamFileChunkForReconResponse{
+		MessageId:                   messageId,
+		Status:                      "OK",
+		OriginalChunkSequenceNumber: req.ChunkSequenceNumber,
+		OriginalFileType:            req.FileType,
 	}
 
 	return &processingResult, nil
 }
 
-func processStreamUnknownFileReconRequest() (*recon_responses.StreamReconFileResponse, error) {
-	processingResult := recon_responses.StreamReconFileResponse{}
-
-	return &processingResult, errors.New("Unknown File Type Supplied")
+func processStreamUnknownFileReconRequest() (*recon_responses.StreamFileChunkForReconResponse, error) {
+	return nil, errors.New("Unknown File Type Supplied")
 }

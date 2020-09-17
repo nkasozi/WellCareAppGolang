@@ -34,40 +34,64 @@ definitions:
     - comparisonPairs
     - sourceFileHash
     - sourceFileName
+    - sourceFileRowCount
     - userId
+    type: object
+  recon_requests.StreamFileChunkForReconRequest:
+    properties:
+      chunkSequenceNumber:
+        type: integer
+      fileType:
+        type: string
+      isEOF:
+        type: boolean
+      records:
+        items:
+          type: string
+        type: array
+      uploadRequestId:
+        type: string
+    required:
+    - chunkSequenceNumber
+    - fileType
+    - isEOF
+    - records
+    - uploadRequestId
     type: object
   recon_responses.GetFileUploadParametersResponse:
     properties:
       comparisonFileExpectedBatchSize:
         type: integer
       comparisonFileHash:
-        description: Comparison File meta
         type: string
-      comparisonFileIsFirstTimeUpload:
-        description: |-
-          flags indicating whether the Comparison file
-          is new to us..if not where did we stop
-        type: boolean
       comparisonFileLastRowReceived:
         type: integer
       comparisonFileName:
         type: string
+      isFirstTimeUploadForCmpFile:
+        type: boolean
+      isFirstTimeUploadForSourceFile:
+        type: boolean
       sourceFileExpectedBatchSize:
         type: integer
       sourceFileHash:
-        description: SRC File meta data
         type: string
-      sourceFileIsFirstTimeUpload:
-        description: |-
-          flags indicating whether the SRC file
-          is new to us..if not where did we stop
-        type: boolean
       sourceFileLastRowReceived:
         type: integer
       sourceFileName:
         type: string
       uploadRequestId:
-        description: unique Id tagged to this whole uplaod
+        type: string
+    type: object
+  recon_responses.StreamFileChunkForReconResponse:
+    properties:
+      messageId:
+        type: string
+      originalChunkSequenceNumber:
+        type: integer
+      originalFileType:
+        type: string
+      status:
         type: string
     type: object
 host: us-central1-reconcilercore.cloudfunctions.net
@@ -88,24 +112,28 @@ paths:
     post:
       consumes:
       - application/json
-      description: given certain details about an incoming upload, it retrieves information
-        necessary for successfull upload e.g batch size
+      description: Receives either Source or Comparison File Chunks and routes them
+        appropriately for Reconciliation
       parameters:
-      - description: GetFileUploadParametersRequest
+      - description: StreamFileChunkForReconRequest
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/recon_requests.GetFileUploadParametersRequest'
+          $ref: '#/definitions/recon_requests.StreamFileChunkForReconRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: GetFileUploadParametersResponse
+          description: StreamFileChunkForReconResponse
           schema:
-            $ref: '#/definitions/recon_responses.GetFileUploadParametersResponse'
+            $ref: '#/definitions/recon_responses.StreamFileChunkForReconResponse'
         "400":
           description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
           schema:
             type: string
         "404":
@@ -116,12 +144,12 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: GetFileUploadParameters
+      summary: StreamFileChunksForRecon
       tags:
-      - GetFileUploadParameters API
+      - StreamFileChunksForRecon API
   /Swagger/index.html:
     get:
-      description: returns json needed by Swagger
+      description: used to access the swagger GUI
       produces:
       - application/json
       responses:

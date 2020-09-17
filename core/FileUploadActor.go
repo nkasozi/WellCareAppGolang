@@ -10,11 +10,13 @@ import (
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared/Constants"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared/Enums/TopicSubscriberTypes"
+	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared/Enums/TopicTypes"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared/Enums/UploadFileTypes"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/viewmodels/recon_requests"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/viewmodels/recon_responses"
 	"math"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -40,34 +42,44 @@ func createTopicSubscribers(subscribers []Entities.TopicSubscriber) (ResultsErr 
 		waitGroup.Add(1)
 
 		//spawn the wait group
-		go func() {
+		go func(subscriber Entities.TopicSubscriber) {
+
+			//make sure we always notify the wait group
+			//when we are done, no matter what
+			defer waitGroup.Done()
 
 			//create the subscriber
 			err := createSubscriber(subscriber)
+
+			//increment the wait group counter by one
+			waitGroup.Add(1)
 
 			//publish the error result
 			//on the channel
 			resultsChannel <- err
 
-			//make sure we always notify the wait group
-			//when we are done, no matter what
-			defer waitGroup.Done()
-		}()
+		}(subscriber)
 	}
 
-	//go through all the errors returned
-	for err := range resultsChannel {
 
-		//oops some go routine
-		//failed
-		if err != nil {
+	go func() {
+		//go through all the errors returned
+		for err := range resultsChannel {
 
-			//take note of any
-			//serious errors
-			ResultsErr = err
+			//oops some go routine
+			//failed
+			if err != nil {
 
+				//take note of any
+				//serious errors
+				ResultsErr = err
+
+			}
+
+			//increment the wait group counter by one
+			waitGroup.Done()
 		}
-	}
+	}()
 
 	//wait for all go routines finish
 	waitGroup.Wait()
@@ -100,7 +112,7 @@ func createSubscriber(subscriber Entities.TopicSubscriber) error {
 func determineBatchSizeForFile(req recon_requests.GetFileUploadParametersRequest, fileType UploadFileTypes.UploadFileType) (batchSize int, numOfBatches int) {
 	switch fileType {
 	case UploadFileTypes.ComparisonFile:
-		if req.ComparisonFileRowCount < 200 {
+		if req.ComparisonFileRowCount <= 200 {
 			batchSize = req.ComparisonFileRowCount
 			numOfBatches = 1
 		} else {
@@ -109,7 +121,7 @@ func determineBatchSizeForFile(req recon_requests.GetFileUploadParametersRequest
 		}
 		break
 	case UploadFileTypes.SrcFile:
-		if req.SourceFileRowCount < 200 {
+		if req.SourceFileRowCount <= 200 {
 			batchSize = req.SourceFileRowCount
 			numOfBatches = 1
 		} else {
@@ -186,9 +198,9 @@ func checkIfIsRepeatUploadAttempt(req recon_requests.GetFileUploadParametersRequ
 	processingResult.ComparisonFileName = req.ComparisionFileName
 	processingResult.ComparisonFileExpectedBatchSize = existingFileUploadAttempt.ComparisonFileExpectedBatchSize
 	processingResult.UploadRequestId = existingFileUploadAttempt.Id
-	processingResult.SourceFileIsFirstTimeUpload = false
+	processingResult.IsFirstTimeUploadForSourceFile = false
 	processingResult.SourceFileLastRowReceived = existingFileUploadAttempt.SourceFileLastRowReceived
-	processingResult.ComparisonFileIsFirstTimeUpload = false
+	processingResult.IsFirstTimeUploadForCmpFile = false
 	processingResult.ComparisonFileLastRowReceived = existingFileUploadAttempt.ComparisonFileLastRowReceived
 
 	//sucess
@@ -202,9 +214,9 @@ func processRequestToUploadNewFile(req recon_requests.GetFileUploadParametersReq
 	comparisonFileBatchSize, _ := determineBatchSizeForFile(req, UploadFileTypes.ComparisonFile)
 
 	//create source file topics in Queue Service
-	srcFileTopicNames := GenerateNamesForSourceFileTopics(req, srcFileNumOfBatches)
-	topicSubscribers := getSourceFileTopicSubscribers(req, srcFileTopicNames)
-	_, err := createSourceFileTopicOnCloudPubSub(Constants.GOOGLE_CLOUD_PROJECT_ID, srcFileTopicNames)
+	srcFileTopics := GenerateNamesForSourceFileTopics(req, srcFileNumOfBatches)
+	topicSubscribers := getSourceFileTopicSubscribers(req, srcFileTopics)
+	_, err := createSourceFileTopicOnCloudPubSub(Constants.GOOGLE_CLOUD_PROJECT_ID, srcFileTopics)
 
 	if err != nil {
 		return nil, err
@@ -212,7 +224,7 @@ func processRequestToUploadNewFile(req recon_requests.GetFileUploadParametersReq
 
 	//create comparison file topics in Queue Service
 	comparisonFileTopicName := GenerateNameForComparisonFileTopic(req.UserId, req.ComparisonFileHash)
-	topicSubscribers = getComparisonFileSubscribers(topicSubscribers)
+	topicSubscribers = getComparisonFileSubscribers(topicSubscribers, comparisonFileTopicName)
 	_, err = gcloud.CreateTopicOnCloudPubSub(Constants.GOOGLE_CLOUD_PROJECT_ID, comparisonFileTopicName)
 
 	if err != nil {
@@ -235,13 +247,13 @@ func processRequestToUploadNewFile(req recon_requests.GetFileUploadParametersReq
 		SourceFileRowCount:              req.SourceFileRowCount,
 		SourceFileExpectedBatchSize:     srcFileBatchSize,
 		SourceFileLastRowReceived:       0,
-		SourceFileTopics:                srcFileTopicNames,
+		SourceFileTopics:                srcFileTopics,
 		ComparisionFileName:             req.ComparisionFileName,
 		ComparisonFileHash:              req.ComparisonFileHash,
 		ComparisonFileRowCount:          req.ComparisonFileRowCount,
 		ComparisonFileExpectedBatchSize: comparisonFileBatchSize,
 		ComparisonFileLastRowReceived:   0,
-		ComparisonFileTopic:             comparisonFileTopicName,
+		ComparisonFileTopic:             Entities.Topic{TopicName: comparisonFileTopicName, TopicType: TopicTypes.ComparisonFileTopic},
 		ComparisonPairs:                 req.ComparisonPairs,
 		Id:                              generateFileUploadID(req),
 		DateCreated:                     time.Now(),
@@ -265,24 +277,24 @@ func processRequestToUploadNewFile(req recon_requests.GetFileUploadParametersReq
 	processingResult.ComparisonFileName = req.ComparisionFileName
 	processingResult.ComparisonFileExpectedBatchSize = comparisonFileBatchSize
 	processingResult.UploadRequestId = uploadRequestId
-	processingResult.SourceFileIsFirstTimeUpload = true
+	processingResult.IsFirstTimeUploadForSourceFile = true
 	processingResult.SourceFileLastRowReceived = 0
-	processingResult.ComparisonFileIsFirstTimeUpload = true
+	processingResult.IsFirstTimeUploadForCmpFile = true
 	processingResult.ComparisonFileLastRowReceived = 0
 
 	//done..success
 	return &processingResult, nil
 }
 
-func getComparisonFileSubscribers(topicSubscribers []Entities.TopicSubscriber) []Entities.TopicSubscriber {
+func getComparisonFileSubscribers(topicSubscribers []Entities.TopicSubscriber, comparisonFileTopicName string) []Entities.TopicSubscriber {
 
-	for _, name := range topicSubscribers {
+	for _, subscriber := range topicSubscribers {
 
 		topicSubscriber := Entities.TopicSubscriber{
-			Name:            name.Name,
+			Name:            strings.ReplaceAll(subscriber.Name, "SRC","CMP"),
 			SubscriberType:  TopicSubscriberTypes.PullSubscriber,
-			NotificationUrl: "https://badadc09b6648dee9da7515d55e0ec68.m.pipedream.net",
-			TopicName:       name.TopicName,
+			NotificationUrl: "",
+			TopicName:       comparisonFileTopicName,
 		}
 
 		topicSubscribers = append(topicSubscribers, topicSubscriber)
@@ -291,32 +303,32 @@ func getComparisonFileSubscribers(topicSubscribers []Entities.TopicSubscriber) [
 	return topicSubscribers
 }
 
-func getSourceFileTopicSubscribers(req recon_requests.GetFileUploadParametersRequest, srcFileTopicNames []string) []Entities.TopicSubscriber {
+func getSourceFileTopicSubscribers(req recon_requests.GetFileUploadParametersRequest, srcFileTopics []Entities.Topic) []Entities.TopicSubscriber {
 
 	var topicSubscribers []Entities.TopicSubscriber
 
-	for i, name := range srcFileTopicNames {
+	for i, topic := range srcFileTopics {
 
 		topicSubscriber := Entities.TopicSubscriber{
 			Name:            GenerateNameForSourceFileTopic(req.UserId, req.SourceFileHash, i),
 			SubscriberType:  TopicSubscriberTypes.PushSubscriber,
-			NotificationUrl: "https://badadc09b6648dee9da7515d55e0ec68.m.pipedream.net",
-			TopicName:       name,
+			NotificationUrl: Constants.PUSH_NOTIFICATION_URL,
+			TopicName:       topic.TopicName,
 		}
 
 		topicSubscribers = append(topicSubscribers, topicSubscriber)
 	}
-	
+
 	return topicSubscribers
 }
 
-func createSourceFileTopicOnCloudPubSub(projectId string, names []string) ([]pubsub.Topic, error) {
+func createSourceFileTopicOnCloudPubSub(projectId string, topics []Entities.Topic) ([]pubsub.Topic, error) {
 
 	var topicPtrs []pubsub.Topic
 
-	for _, name := range names {
+	for _, topic := range topics {
 
-		topicPtr, err := gcloud.CreateTopicOnCloudPubSub(projectId, name)
+		topicPtr, err := gcloud.CreateTopicOnCloudPubSub(projectId, topic.TopicName)
 
 		if err != nil {
 			return nil, err
@@ -328,16 +340,21 @@ func createSourceFileTopicOnCloudPubSub(projectId string, names []string) ([]pub
 	return topicPtrs, nil
 }
 
-func GenerateNamesForSourceFileTopics(req recon_requests.GetFileUploadParametersRequest, NumberOfNames int) []string {
+func GenerateNamesForSourceFileTopics(req recon_requests.GetFileUploadParametersRequest, NumberOfNames int) []Entities.Topic {
 
-	var names []string
+	var topics []Entities.Topic
 
-	for i := 0; i < NumberOfNames; i++ {
+	for i := 1; i <= NumberOfNames; i++ {
 		name := GenerateNameForSourceFileTopic(req.UserId, req.SourceFileHash, i)
-		names = append(names, name)
+		topic:=Entities.Topic{
+			TopicName:           name,
+			ChunkSequenceNumber: i,
+			TopicType:           TopicTypes.SrcFileTopic,
+		}
+		topics = append(topics, topic)
 	}
 
-	return names
+	return topics
 }
 
 func GenerateNameForSourceFileTopic(UserId, Hash string, i int) string {
