@@ -37,6 +37,7 @@ func main() {
 
 	//handle routes
 	router.POST("/GetFileUploadParameters", GetFileUploadParameters)
+	router.POST("/StreamFileChunksForRecon", StreamFileChunksForRecon)
 	router.GET("/Swagger/index.html", Swagger)
 	router.GET("/Swagger/swagger.json", SwaggerDoc)
 
@@ -59,12 +60,13 @@ func main() {
 // GetFileUploadParameters godoc
 // @Summary GetFileUploadParameters
 // @Description given certain details about an incoming upload, it retrieves information necessary for successfull upload e.g batch size
-// @Tags example
+// @Tags GetFileUploadParameters API
 // @Accept json
 // @Produce json
 // @Param request body recon_requests.GetFileUploadParametersRequest true "GetFileUploadParametersRequest"
-// @Success 200 {object} recon_responses.GetFileUploadParametersResponse
+// @Success 200 {object} recon_responses.GetFileUploadParametersResponse "GetFileUploadParametersResponse"
 // @Failure 400 {string} string "Bad Request"
+// @Failure 401 {string} string "Unauthorized"
 // @Failure 404 {string} string "Not Found"
 // @Failure 500 {string} string "Internal Server Error"
 // @Router /GetFileUploadParameters [post]
@@ -73,10 +75,28 @@ func GetFileUploadParameters(w http.ResponseWriter, r *http.Request, _ httproute
 	return
 }
 
+// StreamFileChunksForRecon godoc
+// @Summary StreamFileChunksForRecon
+// @Description Receives either Source or Comparison File Chunks and routes them appropriately for Reconciliation
+// @Tags StreamFileChunksForRecon API
+// @Accept json
+// @Produce json
+// @Param request body recon_requests.StreamFileChunkForReconRequest true "StreamFileChunkForReconRequest"
+// @Success 200 {object} recon_responses.StreamFileChunkForReconResponse "StreamFileChunkForReconResponse"
+// @Failure 400 {string} string "Bad Request"
+// @Failure 401 {string} string "Unauthorized"
+// @Failure 404 {string} string "Not Found"
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /GetFileUploadParameters [post]
+func StreamFileChunksForRecon(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	webapi.StreamFileChunksForRecon(w, r)
+	return
+}
+
 // GetSwaggerJson godoc
 // @Summary GetSwaggerJson
 // @Description returns json needed by Swagger
-// @Tags example
+// @Tags Swagger APIs
 // @Produce json
 // @Success 200 {string} string "Json data"
 // @Failure 400 {string} string "Bad Request"
@@ -90,8 +110,8 @@ func SwaggerDoc(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 // Swagger API godoc
 // @Summary Swagger API
-// @Description returns json needed by Swagger
-// @Tags example
+// @Description used to access the swagger GUI
+// @Tags Swagger APIs
 // @Produce json
 // @Success 200 {string} string "Json data"
 // @Failure 400 {string} string "Bad Request"

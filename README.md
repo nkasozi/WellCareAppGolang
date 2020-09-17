@@ -19,3 +19,85 @@ The solution consists of the following main functionalities: a web portal, web A
 ## Proposed Architecture
 
 ![image](assets/arch-recon.png)
+
+## Tech Used
+- Golang
+- Git
+- Cloud Run for Serverless hosting
+- Cloud Pub Sub for a Kafka like Queue broker Service
+- Redis as the Datastore
+
+## Setup Instructions
+
+- Install Go on your Computer
+```
+Go to https://golang.org/doc/install and follow the download and installation instructions for your OS
+```
+
+- Clone this repo 
+```
+ git clone <repoUrl>
+```
+ 
+- Change directory to this repo folder
+```
+cd ./reconciler-backend-golang
+```
+
+- Restore Go dependencies
+```
+go mod download 
+```
+
+- Set the following ENVIRONMENT VARIABLES
+```
+PORT (Optional) = Port you want this app to run on. default port is 8090 
+REDIS_HOST = Ip and Port of Redis Host
+REDIS_PASSWORD = Password of Redis Instance
+GOOGLE_APPLICATION_CREDENTIALS = Path to file with cloud run service creds
+```
+
+- Run Tests (Optional)
+```
+go test -v ./integrationtests/...
+```
+
+- Build the app
+```
+go build .
+```
+
+- Run the app
+```
+go run main.go
+```
+
+
+## Development
+Want to contribute? Great!
+
+To fix a bug or enhance the existing code by developing a new feature, follow these steps:
+
+- clone the repo
+- Create a new branch (`git checkout -b improve-feature`)
+- Make the appropriate changes in the files
+- Add integration tests to test the feature/behavior
+- Commit your changes (`git commit -am 'Improve feature'`)
+- Push to the branch (`git push origin improve-feature`)
+- Create a Pull Request (`go to https://gitlab.com/capslock-ltd/reconciler/backend-golang/-/merge_requests/new`)
+
+## Note on Tests
+
+A note on tests...there are 2 kinds of test projects in the repo. 
+
+- Unit tests deal with testing the logic rules of a single class/package. 
+That means any dependencies of that package are mocked (fake versions are used) out using dependency injection normally. 
+- Integration tests test the real world behavior, under certain scenarios, for an entire application when given actual real-world dependencies.
+
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Please make sure to update the tests as appropriate.
+
+## License
+[EULA](https://www.eulatemplate.com/live.php?token=7IahE5s7V3EgRDDu4VnWZmffOQGDGkt8)
