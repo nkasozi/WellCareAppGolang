@@ -28,6 +28,64 @@
                     "application/json"
                 ],
                 "tags": [
+                    "GetFileUploadParameters API"
+                ],
+                "summary": "GetFileUploadParameters",
+                "parameters": [
+                    {
+                        "description": "GetFileUploadParametersRequest",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/recon_requests.GetFileUploadParametersRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GetFileUploadParametersResponse",
+                        "schema": {
+                            "$ref": "#/definitions/recon_responses.GetFileUploadParametersResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/StreamFileChunksForRecon": {
+            "post": {
+                "description": "Receives either Source or Comparison File Chunks and routes them appropriately for Reconciliation",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
                     "example"
                 ],
                 "summary": "GetFileUploadParameters",

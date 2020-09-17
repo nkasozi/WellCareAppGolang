@@ -1,13 +1,14 @@
 package main
 
 import (
+	"log"
+	"net/http"
+	"os"
+
 	"github.com/julienschmidt/httprouter"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/shared/Constants"
 	"gitlab.com/capslock-ltd/reconciler/backend-golang/webapi"
-	"log"
-	"net/http"
-	"os"
 )
 
 // @title Reconciler Backend Core API
@@ -49,10 +50,9 @@ func main() {
 
 	// Start HTTP server.
 	log.Printf("listening on port %s", port)
-	if err := http.ListenAndServe(":" + port, router); err != nil {
+	if err := http.ListenAndServe(":"+port, router); err != nil {
 		log.Fatal(err)
 	}
-
 
 }
 
@@ -70,6 +70,24 @@ func main() {
 // @Router /GetFileUploadParameters [post]
 func GetFileUploadParameters(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	webapi.GetFileUploadParameters(w, r)
+	return
+}
+
+// StreamFileChunksForRecon godoc
+// @Summary StreamFileChunksForRecon
+// @Description Receives either Source or Comparison File Chunks and routes them appropriately for Reconciliation
+// @Tags StreamFileChunksForRecon API
+// @Accept json
+// @Produce json
+// @Param request body recon_requests.StreamFileChunkForReconRequest true "StreamFileChunkForReconRequest"
+// @Success 200 {object} recon_responses.StreamFileChunkForReconResponse "StreamFileChunkForReconResponse"
+// @Failure 400 {string} string "Bad Request"
+// @Failure 401 {string} string "Unauthorized"
+// @Failure 404 {string} string "Not Found"
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /StreamFileChunksForRecon [post]
+func StreamFileChunksForRecon(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	webapi.StreamFileChunksForRecon(w, r)
 	return
 }
 
