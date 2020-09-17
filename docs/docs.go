@@ -35,7 +35,7 @@ var doc = `{
     "paths": {
         "/GetFileUploadParameters": {
             "post": {
-                "description": "Receives either Source or Comparison File Chunks and routes them appropriately for Reconciliation",
+                "description": "given certain details about an incoming upload, it retrieves information necessary for successfull upload e.g batch size",
                 "consumes": [
                     "application/json"
                 ],
@@ -101,7 +101,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "example"
+                    "StreamFileChunksForRecon API"
                 ],
                 "summary": "StreamFileChunksForRecon",
                 "parameters": [

@@ -112,6 +112,45 @@ paths:
     post:
       consumes:
       - application/json
+      description: given certain details about an incoming upload, it retrieves information
+        necessary for successfull upload e.g batch size
+      parameters:
+      - description: GetFileUploadParametersRequest
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/recon_requests.GetFileUploadParametersRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetFileUploadParametersResponse
+          schema:
+            $ref: '#/definitions/recon_responses.GetFileUploadParametersResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: GetFileUploadParameters
+      tags:
+      - GetFileUploadParameters API
+  /StreamFileChunksForRecon:
+    post:
+      consumes:
+      - application/json
       description: Receives either Source or Comparison File Chunks and routes them
         appropriately for Reconciliation
       parameters:
