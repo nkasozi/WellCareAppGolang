@@ -35,7 +35,7 @@ var doc = `{
     "paths": {
         "/GetFileUploadParameters": {
             "post": {
-                "description": "given certain details about an incoming upload, it retrieves information necessary for successfull upload e.g batch size",
+                "description": "Receives either Source or Comparison File Chunks and routes them appropriately for Reconciliation",
                 "consumes": [
                     "application/json"
                 ],
@@ -45,15 +45,15 @@ var doc = `{
                 "tags": [
                     "GetFileUploadParameters API"
                 ],
-                "summary": "GetFileUploadParameters",
+                "summary": "StreamFileChunksForRecon",
                 "parameters": [
                     {
-                        "description": "GetFileUploadParametersRequest",
+                        "description": "StreamFileChunkForReconRequest",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/recon_requests.GetFileUploadParametersRequest"
+                            "$ref": "#/definitions/recon_requests.StreamFileChunkForReconRequest"
                         }
                     }
                 ],
@@ -61,7 +61,7 @@ var doc = `{
                     "200": {
                         "description": "GetFileUploadParametersResponse",
                         "schema": {
-                            "$ref": "#/definitions/recon_responses.GetFileUploadParametersResponse"
+                            "$ref": "#/definitions/recon_responses.StreamFileChunkForReconResponse"
                         }
                     },
                     "400": {
