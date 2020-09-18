@@ -112,22 +112,22 @@ paths:
     post:
       consumes:
       - application/json
-      description: Receives either Source or Comparison File Chunks and routes them
-        appropriately for Reconciliation
+      description: given certain details about an incoming upload, it retrieves information
+        necessary for successfull upload e.g batch size
       parameters:
-      - description: StreamFileChunkForReconRequest
+      - description: GetFileUploadParametersRequest
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/recon_requests.StreamFileChunkForReconRequest'
+          $ref: '#/definitions/recon_requests.GetFileUploadParametersRequest'
       produces:
       - application/json
       responses:
         "200":
           description: GetFileUploadParametersResponse
           schema:
-            $ref: '#/definitions/recon_responses.StreamFileChunkForReconResponse'
+            $ref: '#/definitions/recon_responses.GetFileUploadParametersResponse'
         "400":
           description: Bad Request
           schema:
@@ -144,7 +144,7 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: StreamFileChunksForRecon
+      summary: GetFileUploadParameters
       tags:
       - GetFileUploadParameters API
   /StreamFileChunksForRecon:
